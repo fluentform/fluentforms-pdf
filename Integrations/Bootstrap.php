@@ -12,9 +12,9 @@ class Bootstrap
     public function __construct(Application $app)
     {
         add_filter('fluentform_global_settings_components', array($this, 'globalSettings'));
-        add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', array($this, 'pdfDownload'));
-       
-        
+        add_filter('fluentform_form_settings_menu', array($this, 'settingsMenu'));
+
+        add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', array($this, 'pdfDownload'));  
       
     }
 
@@ -27,10 +27,32 @@ class Bootstrap
 
      }
 
+     public function settingsMenu($settingsMenus) {
+        $settingsMenus['pdf'] = array(
+            'title' => __('PDF settings', 'fluentform'),
+            'slug'  => 'pdf_settings',
+            'hash'  => 'pdf',
+            'route' => '/pdf-settings'
+        );
+        return $settingsMenus;
+     }
+
      public function pdfDownload() {
-        extract($_REQUEST);
+
+        if(!isset($_REQUEST['entry'])) {
+            return ;
+        }
+     
+        $userInputData = $_REQUEST['entry']["user_inputs"];
+
+        // dd($userInputData);
+        $inputHtml = '';
+        foreach($userInputData as $key => $value) {
+            $inputHtml .=  '<p>'.$key . ': ' .$value. '</p>';
+        };
+
         $mpdf = new \Mpdf\Mpdf();
-        $mpdf->WriteHTML('<h1>'.$entry_id.'</h1><p style="color:red;">this is test para by hasanuzzaman</p>');
+        $mpdf->WriteHTML($inputHtml);
         $mpdf->Output();
      }
 
