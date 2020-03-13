@@ -37,6 +37,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 
 
+
 class FluentFormPdf
 {
 
@@ -55,12 +56,13 @@ class FluentFormPdf
 
     protected function includeFiles()
     {
-        include_once FLUENTFORM_PDF.'Integrations/Bootstrap.php';
+        require_once FLUENTFORM_PDF . 'autoload.php';
     }
 
     protected function registerHooks($fluentForm)
     {
-        new \FluentFormPdf\Integrations\Bootstrap($fluentForm);
+        new \FluentFormPdf\Classes\Integrations\Bootstrap($fluentForm);
+        
     }
 
 
