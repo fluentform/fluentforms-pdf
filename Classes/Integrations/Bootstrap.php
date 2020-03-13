@@ -2,16 +2,15 @@
 
 namespace FluentFormPdf\Classes\Integrations;
 
-use FluentForm\App\Services\Integrations\IntegrationManager;
+
 use FluentForm\Framework\Foundation\Application;
 use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\App\Modules\Acl\Acl;
+use FluentFormPdf\Classes\Templates\Template1;
 use FluentFormPdf\Classes\Templates\Template2;
 
 class Bootstrap
 {
-
-
     protected $app = null;
     public function __construct( Application $app)
     {
@@ -66,15 +65,11 @@ class Bootstrap
             return ;
         }
      
-        // $userInputData = $_REQUEST['entry']["user_inputs"];
-
-        // $inputHtml = '';
-        // foreach($userInputData as $key => $value) {
-        //     $inputHtml .=  '<p>'.$key . ': ' .$value. '</p>';
-        // };
+        $userInputData = $_REQUEST['entry']["user_inputs"];
 
 
-        $inputHtml = (new Template2())->getHtmlTemplate('shamim');
+
+        $inputHtml = (new Template2())->getHtmlTemplate($userInputData);
         
         // dd($tem);
 

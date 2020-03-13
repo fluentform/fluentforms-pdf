@@ -4,10 +4,13 @@ use FluentFormPdf\Classes\Templates\TemplateManager;
 
 
 class Template2 extends TemplateManager{
-    public function getHtmlTemplate ($title) {
-        $html  = '<h3 style="color:red;">';
-        $html .= $title;
-        $html .= '</h3>';
-        return $html;
+    public function getHtmlTemplate ($userInputData) {
+
+        $inputHtml = '';
+        
+        foreach($userInputData as $key => $value) {
+                $inputHtml .=  '<p style="color:red;">'.$key . ': ' .$value. '</p>';
+        };
+        return $inputHtml;
     }
 }
