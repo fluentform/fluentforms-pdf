@@ -18,9 +18,9 @@ class Bootstrap
 
         add_filter('fluentform_global_settings_components', array($this, 'globalSettings'));
         add_filter('fluentform_form_settings_menu', array($this, 'settingsMenu'));
-        add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', array($this, 'pdfDownload'));  
+        add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', array($this, 'pdfDownload'));   
         add_action('init', array($this, 'setAjaxHandler'));
-      
+        
     }
 
     public function globalSettings($setting){
@@ -49,7 +49,7 @@ class Bootstrap
                 Acl::verify('fluentform_forms_manager');
         
               
-        
+                
                 wp_send_json_success([
                     'pages' => 'shamim'
                 ], 200);
@@ -60,10 +60,10 @@ class Bootstrap
 
      public function pdfDownload() {
 
-        if(!isset($_REQUEST['entry'])) {
+        if(!isset($_REQUEST['entry']) || !isset($_REQUEST['settingsId'])) {
             return ;
         }
-        $template = $_REQUEST['pdfKey'];
+        $template = $_REQUEST['settingsId'];
         $userInputData = $_REQUEST['entry']["user_inputs"];
 
         
