@@ -34,13 +34,8 @@ define('FLUENTFORM_PDF_VERSION', '1.0.0');
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-
-
-
-
 class FluentFormPdf
 {
-
     public function boot()
     {
         if (!defined('FLUENTFORM')) {
@@ -62,7 +57,6 @@ class FluentFormPdf
     protected function registerHooks($fluentForm)
     {
         new \FluentFormPdf\Classes\Controller\Bootstrap($fluentForm);
-        
     }
 
 
