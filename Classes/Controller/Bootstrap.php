@@ -19,7 +19,7 @@ class Bootstrap
         add_filter('fluentform_global_settings_components', array($this, 'globalSettings'));
         add_filter('fluentform_form_settings_menu', array($this, 'settingsMenu'));
         add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', array($this, 'pdfDownload'));   
-        add_action('init', array($this, 'setAjaxHandler'));
+        add_action('wp_ajax_fluentform_get_form_pdf_template_settings', array($this, 'getTemplateSettings'));   
         
     }
 
@@ -42,28 +42,18 @@ class Bootstrap
         return $settingsMenus;
      }
 
-     public function setAjaxHandler() {
-        $this->app->addAdminAjaxAction(
-            'fluentform_pdf_admin_ajax_actions',
-            function () {
-                Acl::verify('fluentform_forms_manager');
-        
-              
-                
-                wp_send_json_success([
-                    'pages' => 'shamim'
-                ], 200);
-            }
-        );
+     public function getTemplateSettings() {
+        //should fix
+        // $templateManager = new \FluentFormPdf\Classes\Templates\TemplateManager($this->app);
+        // $templateManager->getTemplateSettings();
      }
      
 
      public function pdfDownload() {
-
-        if(!isset($_REQUEST['entry']) || !isset($_REQUEST['settingsId'])) {
+        if(!isset($_REQUEST['entry']) || !isset($_REQUEST['settings'])) {
             return ;
         }
-        $template = $_REQUEST['settingsId'];
+        $settings = $_REQUEST['settings'];
         $userInputData = $_REQUEST['entry']["user_inputs"];
 
         
