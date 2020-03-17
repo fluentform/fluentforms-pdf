@@ -13,6 +13,19 @@ class Template1 extends TemplateManager {
          );
     }
     
+    public function getTemplateSettings() {
+        return [
+            'fields' => [
+                [
+                    'key' => 'filename',
+                    'label' => 'Filename Name',
+                    'required' => true,
+                    'placeholder' => 'Your file Name',
+                    'component' => 'text'
+                ]
+            ]
+        ];
+    }
 
     public function getHtmlTemplate ($userInputData) {
         
