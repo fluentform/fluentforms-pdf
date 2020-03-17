@@ -15,10 +15,6 @@ abstract class TemplateManager {
     }
 
     abstract public function getHtmlTemplate($title);
-
-    public function getTemplateSettings()
-    {
-        dd('shamim');
-    }
+    abstract public function getTemplateSettings($title);
    
 }
