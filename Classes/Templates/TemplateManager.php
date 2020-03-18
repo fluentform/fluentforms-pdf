@@ -3,21 +3,24 @@ namespace FluentFormPdf\Classes\Templates;
 use FluentForm\Framework\Foundation\Application;
 
 abstract class TemplateManager {
-    protected $templateName = '';
-    protected $templateKey = '';
     private $app;
+    protected $templateKey = '';
 
-
-    public function __construct ($app, $templateName, $templateKey) {
+    public function __construct ($app, $templateKey) {
         $this->app = $app;
-        $this->templateName = $templateName;
         $this->templateKey = $templateKey;
     }
 
     public function registerAdminHooks() {
-        add_action('wp_ajax_fluentform_get_form_pdf_template_settings', array($this, 'getTemplateSettings')); 
+
+        add_filter('fluentform_get_pdf_settings_fields_' . $this->templateKey, array($this, 'getSettingsFields'), 10, 2);
+    
     }
-    // abstract public function getHtmlTemplate($title);
-    abstract public function getSettingsFields($settings, $formId);
+
+    abstract public function getSettingsFields();
+
+    abstract public function getHtmlTemplate($userInputData);
+   
+   
    
 }
