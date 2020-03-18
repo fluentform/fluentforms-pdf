@@ -9,21 +9,30 @@ class Template1 extends TemplateManager {
     {
         parent::__construct(
             $app,
-            'Template1',
-            'fluentform_pdf_template1'
+            'template1'
         );
 
         $this->registerAdminHooks();
     }
     
-    public function getSettingsFields($settings, $formId) {
+    public function getSettingsFields()
+    {
         return [
             'fields' => [
                 [
                     'key' => 'filename',
-                    'label' => 'Filename Name',
+                    'label' => 'File Name',
                     'required' => true,
-                    'placeholder' => 'Your file Name',
+                    'require_list' => false,
+                    'placeholder' => 'Your File Name',
+                    'component' => 'text'
+                ],
+                [
+                    'key' => 'pdfheader',
+                    'label' => 'PDF Header',
+                    'required' => true,
+                    'require_list' => false,
+                    'placeholder' => 'Your Pdf Header',
                     'component' => 'text'
                 ]
             ]
