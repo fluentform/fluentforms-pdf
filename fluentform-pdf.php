@@ -56,7 +56,7 @@ class FluentFormPdf
 
     protected function registerHooks($fluentForm)
     {
-        new \FluentFormPdf\Classes\Controller\Bootstrap($fluentForm);
+        new \FluentFormPdf\Classes\Controller\GlobalPdfManager($fluentForm);
     }
 
 

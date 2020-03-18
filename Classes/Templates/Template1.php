@@ -1,19 +1,22 @@
 <?php
 namespace FluentFormPdf\Classes\Templates;
 use FluentFormPdf\Classes\Templates\TemplateManager;
-
+use FluentForm\Framework\Foundation\Application;
 
 class Template1 extends TemplateManager {
 
-    public function __construct()
+    public function __construct(Application $app)
     {
-          parent::__construct(
-                'Template1',
-                'fluentform_pdf_template1'
-         );
+        parent::__construct(
+            $app,
+            'Template1',
+            'fluentform_pdf_template1'
+        );
+
+        $this->registerAdminHooks();
     }
     
-    public function getTemplateSettings() {
+    public function getSettingsFields($settings, $formId) {
         return [
             'fields' => [
                 [
