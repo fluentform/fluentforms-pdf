@@ -54,9 +54,7 @@ class GlobalPdfManager
 
         $settingsFields = apply_filters('fluentform_get_pdf_settings_fields_' . $templateKey, [], $templateKey);
         
-        wp_send_json_success([
-            'settings_fields' => $settingsFields,
-        ], 200);
+        wp_send_json_success( $settingsFields, 200);
     }
 
      public function pdfDownload() 
