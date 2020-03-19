@@ -20,21 +20,29 @@ class Template1 extends TemplateManager {
         return [
             'fields' => [
                 [
-                    'key' => 'filename',
-                    'label' => 'File Name',
-                    'required' => true,
-                    'require_list' => false,
-                    'placeholder' => 'Your File Name',
-                    'component' => 'text'
+                    'key'           => 'filename',
+                    'label'         => 'File Name',
+                    'required'      => true,
+                    'require_list'  => false,
+                    'category'      => 'general',
+                    'placeholder'   => 'Your File Name',
+                    'component'     => 'text'
                 ],
                 [
-                    'key' => 'pdfheader',
-                    'label' => 'PDF Header',
-                    'required' => true,
-                    'require_list' => false,
-                    'placeholder' => 'Your Pdf Header',
-                    'component' => 'text'
-                ]
+                    'key'           => 'pdfheader',
+                    'label'         => 'PDF Header',
+                    'required'      => true,
+                    'require_list'  => false,
+                    'category'      => 'appearance',
+                    'placeholder'   => 'Your Pdf Header',
+                    'component'     => 'text'
+                ],
+                [
+                    'key'           => 'conditionals',
+                    'label'         => 'Conditional Logics',
+                    'tips'          => 'Allow Pdf conditions',
+                    'component'     => 'conditional_block'
+                ],
             ]
         ];
     }

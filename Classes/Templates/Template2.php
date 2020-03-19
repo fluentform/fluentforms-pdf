@@ -22,12 +22,18 @@ class Template2 extends TemplateManager{
         return [
             'fields' => [
                 [
-                    'key' => 'filename',
-                    'label' => 'File Name',
-                    'required' => true,
-                    'require_list' => false,
-                    'placeholder' => 'Your File Name',
-                    'component' => 'text'
+                    'key'           => 'filename',
+                    'label'         => 'File Name',
+                    'required'      => true,
+                    'require_list'  => false,
+                    'placeholder'   => 'Your File Name',
+                    'component'     => 'text'
+                ],
+                [
+                    'key'           => 'conditionals',
+                    'label'         => 'Conditional Logics',
+                    'tips'          => 'Allow Pdf conditions',
+                    'component'     => 'conditional_block'
                 ]
             ]
         ];
