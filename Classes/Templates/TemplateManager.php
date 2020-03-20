@@ -14,6 +14,7 @@ abstract class TemplateManager {
     public function registerAdminHooks() {
 
         add_filter('fluentform_get_pdf_settings_fields_' . $this->templateKey, array($this, 'getSettingsFields'), 10, 2);
+        add_filter('fluentform_get_pdf_html_template_' . $this->templateKey, array($this, 'getHtmlTemplate'), 10, 2);
     
     }
 
