@@ -1,20 +1,19 @@
 <?php
+
 namespace FluentFormPdf\Classes\Templates;
-use FluentFormPdf\Classes\Templates\TemplateManager;
+
 use FluentForm\Framework\Foundation\Application;
+use FluentFormPdf\Classes\Templates\TemplateManager;
 
-
-class Template2 extends TemplateManager{
-
+class Template2 extends TemplateManager
+{
+    protected $templateKey = 'template2';
 
     public function __construct(Application $app)
     {
-          parent::__construct(
-                $app,
-                'template2', //templateKey
-         );
+        parent::__construct($app);
 
-         $this->registerAdminHooks();
+        $this->registerAdminHooks();
     }
 
     public function getSettingsFields()
@@ -43,9 +42,10 @@ class Template2 extends TemplateManager{
 
         $inputHtml = '';
         
-        foreach($userInputData as $key => $value) {
+        foreach ($userInputData as $key => $value) {
                 $inputHtml .=  '<p style="color:red;">'.$key . ': ' .$value. '</p>';
         };
+
         return $inputHtml;
     }
 }

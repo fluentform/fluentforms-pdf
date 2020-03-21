@@ -1,16 +1,17 @@
 <?php
-namespace FluentFormPdf\Classes\Templates;
-use FluentFormPdf\Classes\Templates\TemplateManager;
-use FluentForm\Framework\Foundation\Application;
 
-class Template1 extends TemplateManager {
+namespace FluentFormPdf\Classes\Templates;
+
+use FluentForm\Framework\Foundation\Application;
+use FluentFormPdf\Classes\Templates\TemplateManager;
+
+class Template1 extends TemplateManager
+{
+    protected $templateKey = 'template1';
 
     public function __construct(Application $app)
     {
-        parent::__construct(
-            $app,
-            'template1' //templateKey
-        );
+        parent::__construct($app);
 
         $this->registerAdminHooks();
     }
@@ -51,9 +52,10 @@ class Template1 extends TemplateManager {
         
         $inputHtml = '';
      
-        foreach($userInputData as $key => $value) {
+        foreach ($userInputData as $key => $value) {
                 $inputHtml .=  '<p style="color:green;">'.$key . ':</p><p>' .$value. '</p>';
         };
+
         return $inputHtml;
     }
 }
