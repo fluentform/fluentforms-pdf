@@ -3,9 +3,9 @@
 namespace FluentFormPdf\Classes\Controller;
 
 
-use FluentForm\Framework\Foundation\Application;
-use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\App\Modules\Acl\Acl;
+use FluentForm\Framework\Helpers\ArrayHelper;
+use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
 
 
@@ -13,43 +13,49 @@ class GlobalPdfManager
 {
     protected $app = null;
 
-    public function __construct($app)
+    public function __construct(Application $app)
     {
         $this->app = $app;
 
         // Global settings register
-        add_filter('fluentform_global_settings_components', array($this, 'globalSettings'));
-        add_filter('fluentform_form_settings_menu', array($this, 'settingsMenu'));
-        add_action('wp_ajax_fluentform_get_pdf_global_setting_options', array($this, 'getGlobalSettings'));
+        add_filter('fluentform_global_settings_components', [$this, 'globalSettings']);
+        add_filter('fluentform_form_settings_menu', [$this, 'settingsMenu']);
+        add_action('wp_ajax_fluentform_get_pdf_global_setting_options', [$this, 'getGlobalSettings']);
 
         // single form pdf settings fields ajax
-        add_action('wp_ajax_fluentform_get_form_pdf_template_settings', array($this, 'getFormTemplateSettings'));
-        add_action('wp_ajax_fluentform_pdf_admin_ajax_actions',array($this, 'getAllTemplates'));
+        add_action(
+            'wp_ajax_fluentform_get_form_pdf_template_settings',
+            [$this, 'getFormTemplateSettings']
+        );
+
+        add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', [$this, 'getAllTemplates']);
 
         // Frontend render When download button clicked
-        add_action('wp_ajax_fluentform_pdf_download_ajax', array($this, 'pdfDownload'));
-        
+        add_action('wp_ajax_fluentform_pdf_download_ajax', [$this, 'pdfDownload']);
+        add_action('wp_ajax_nopriv_fluentform_pdf_download_ajax', [$this, 'pdfDownload']);
     }
 
    
     public function globalSettings($setting)
     {
-        $setting["pdf"]  = [
+        $setting["pdf"] = [
              "hash" => "pdf",
              "title" => "PDF"
         ];
-       return $setting;
+        
+        return $setting;
     }
 
     
     public function settingsMenu($settingsMenus) 
     {
-        $settingsMenus['pdf'] = array(
+        $settingsMenus['pdf'] = [
             'title' => __('PDF settings', 'fluentform'),
             'slug'  => 'pdf_settings',
             'hash'  => 'pdf',
             'route' => '/pdf-settings'
-        );
+        ];
+
         return $settingsMenus;
     }
 
@@ -64,7 +70,7 @@ class GlobalPdfManager
         $classes = apply_filters(
             'fluentform_pdf_template_map',
             [
-                "template1" =>[
+                "template1" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template1",
                     'name'  => 'Blank Green'
                 ],
@@ -74,19 +80,22 @@ class GlobalPdfManager
                 ]
             ]
         );
+
         return $classes;
     }
 
     /*
-    * @return [ key => value]
+    * @return [key => value]
     * processed for dropdown fields
     */ 
-    public function formattedTemplates() {
-        $classes = $this->getAvailableTemplates();
+    public function formattedTemplates()
+    {
         $allTemplates = [];
-        forEach($classes as $key => $value){    
+
+        foreach ($this->getAvailableTemplates() as $key => $value) {    
             $allTemplates[$key] = $value['name'];      
         };
+
         return $allTemplates;
     }
 
@@ -98,7 +107,7 @@ class GlobalPdfManager
     public function getGlobalFields() 
     {   
        return [ 
-           'fields' =>[
+           'fields' => [
                [
                     'key'       => 'paper_size',
                     'label'     => 'Paper size',
@@ -164,7 +173,6 @@ class GlobalPdfManager
                 ],
            ]
         ];
-       
     }
 
 
@@ -174,8 +182,9 @@ class GlobalPdfManager
     */ 
     public function getAllTemplates()
     {
-        $allTemplates = $this->formattedTemplates();
-        wp_send_json_success( $allTemplates ,200);
+        wp_send_json_success(
+            $this->formattedTemplates()
+        );
     }
 
 
@@ -185,10 +194,9 @@ class GlobalPdfManager
     */
     public function getGlobalSettings() 
     {
-        $paperDetails = $this->getGlobalFields();
         wp_send_json_success(
-           $paperDetails, 200);
-
+           $this->getGlobalFields()
+        );
     }
 
 
@@ -199,15 +207,18 @@ class GlobalPdfManager
     public function getFormTemplateSettings()
     {
         $templateKey = $_REQUEST['templateKey'];
+
         $allTemplates =  $this->getAvailableTemplates();
        
-        foreach( $allTemplates as $key => $value ){
+        foreach ($allTemplates as $key => $value) {
             new $value['path']($this->app);
         };
 
-        $settingsFields = apply_filters('fluentform_get_pdf_settings_fields_' . $templateKey, [], $templateKey);
+        $settingsFields = apply_filters(
+            'fluentform_get_pdf_settings_fields_' . $templateKey, [], $templateKey
+        );
         
-        wp_send_json_success( $settingsFields, 200);
+        wp_send_json_success($settingsFields);
     }
 
 
@@ -217,22 +228,22 @@ class GlobalPdfManager
     */
     public function pdfDownload() 
     {
-        if(!isset($_REQUEST['entry']) || !isset($_REQUEST['settings'])) {
+        if (!isset($_REQUEST['entry']) || !isset($_REQUEST['settings'])) {
             return ;
-        }   
+        }
+
         $settings = $_REQUEST['settings'];
-        $templateKey = $_REQUEST['settings']['value']['template'];
         $userInputData = $_REQUEST['entry']["user_inputs"];
+        $templateKey = $_REQUEST['settings']['value']['template'];
 
         $allTemplates =  $this->getAvailableTemplates();
 
-        $template = new $allTemplates[$templateKey]["path"]($this->app); 
+        $template = new $allTemplates[$templateKey]["path"]($this->app);
+
         $inputHtml = apply_filters('fluentform_get_pdf_html_template_' . $templateKey, $userInputData);
 
         $mpdf = new \Mpdf\Mpdf();
         $mpdf->WriteHTML($inputHtml);
         $mpdf->Output();
     }
-
-
 }
