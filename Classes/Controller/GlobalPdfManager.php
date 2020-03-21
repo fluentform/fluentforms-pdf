@@ -22,13 +22,16 @@ class GlobalPdfManager
         // Global settings menu declaration
         add_filter('fluentform_form_settings_menu', array($this, 'settingsMenu'));
 
-        // When download button clicked
+        // Frontend render When download button clicked
         add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', array($this, 'pdfDownload'));
 
-        // form pdf settings fields
+        // single form pdf settings fields ajax
         add_action('wp_ajax_fluentform_get_form_pdf_template_settings', array($this, 'getFormTemplateSettings'));
         
         add_action('wp_ajax_fluentform_pdf_admin_ajax_actions',array($this, 'getAllTemplates'));
+        
+        add_action('wp_ajax_fluentform_get_pdf_global_setting_options', array($this, 'getGlobalSettingOptions'));
+        
         
     }
 
@@ -42,6 +45,7 @@ class GlobalPdfManager
        return $setting;
     }
 
+    
     public function settingsMenu($settingsMenus) 
     {
         $settingsMenus['pdf'] = array(
@@ -53,43 +57,98 @@ class GlobalPdfManager
         return $settingsMenus;
     }
 
+
+    /*
+    * @required for new template 
+    * return key => [ path, name]
+    * To register a new template this filter must use for path mapping
+    * filter: fluentform_pdf_template_map
+    */ 
     public function getAvailableTemplates() 
     {
-        /*
-        * key => [ path, name]
-        * For a new template this filter should use for path mapping
-        */ 
         $classes = apply_filters(
             'fluentform_pdf_template_map',
             [
                 "template1" =>[
                     'path' => "\FluentFormPdf\Classes\Templates\Template1",
-                    'name'  => 'Blank'
+                    'name'  => 'Blank Green'
                 ],
                 "template2" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template2",
-                    'name'  => 'Color' 
+                    'name'  => 'Color Red' 
                 ]
             ]
         );
         return $classes;
     }
 
+
+    /*
+    * return [ key name]
+    * global pdf paper fields options
+    */ 
+    public function getGlobalOptions() 
+    {
+        return [
+            "paper_size" =>[
+                'a_four'    => 'A4 (210 x 297mm)',
+                'letter'    =>'Letter (8.5 x 11in)',
+                'legal'     =>'Legal (8.5 x 14in)',
+                'ledger'    =>'Ledger / Tabloid (11 x 17in)',
+                'executive' =>'Executive (7 x 10in)',
+                'a_zero'    => 'A0 (841 x 1189mm)',
+                'a_one'     => 'A1 (594 x 841mm)'
+            ],
+            "font_family" => [
+                'serif' => "Serif",
+                'mono'  => 'mono' 
+            ]
+        ];
+    }
+
+
+    /*
+    * All the registered template will return
+    * by this @getAllTemplates 
+    * data structure: key => [ path, name]
+    */ 
     public function getAllTemplates()
     {
-        /*
-        * key => [ path, name]
-        * 
-        */ 
         $classes = $this->getAvailableTemplates();
         $allTemplates = [];
         forEach($classes as $key => $value){    
-                $allTemplates[$key] = $value['name'];
-            
+            $allTemplates[$key] = $value['name'];
         };
-        wp_send_json_success( $allTemplates );
+        wp_send_json_success( $allTemplates ,200);
     }
 
+
+    /*
+    * Global settings options will get from this 
+    * method @getPdfSettingOptions
+    */
+    public function getGlobalSettingOptions() {
+        $classes = $this->getAvailableTemplates();
+        $allTemplates = [];
+        forEach($classes as $key => $value){    
+            $allTemplates[$key] = $value['name'];      
+        };
+
+        $paperDetails = $this->getGlobalOptions();
+
+        wp_send_json_success(array(
+            'templates'   => $allTemplates,
+            'paper_size'  => $paperDetails['paper_size'],
+            'font_family' => $paperDetails['font_family']
+        ), 200);
+
+    }
+
+
+    /*
+    * return Fields which are available on specific template
+    * in single form settings from method @getFormTemplateSettings
+    */
     public function getFormTemplateSettings()
     {
         $templateKey = $_REQUEST['templateKey'];
@@ -104,6 +163,11 @@ class GlobalPdfManager
         wp_send_json_success( $settingsFields, 200);
     }
 
+
+    /*
+    * render the main pdf in frontend
+    * when download button will press
+    */
     public function pdfDownload() 
     {
         if(!isset($_REQUEST['entry']) || !isset($_REQUEST['settings'])) {

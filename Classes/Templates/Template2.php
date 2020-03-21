@@ -11,7 +11,7 @@ class Template2 extends TemplateManager{
     {
           parent::__construct(
                 $app,
-                'template2',
+                'template2', //templateKey
          );
 
          $this->registerAdminHooks();
