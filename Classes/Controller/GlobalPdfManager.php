@@ -139,7 +139,7 @@ class GlobalPdfManager
         wp_send_json_success(array(
             'templates'   => $allTemplates,
             'paper_size'  => $paperDetails['paper_size'],
-            'font_family' => $paperDetails['font_family']
+            'fonts' => $paperDetails['font_family']
         ), 200);
 
     }
