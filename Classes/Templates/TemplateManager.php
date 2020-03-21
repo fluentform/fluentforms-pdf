@@ -23,5 +23,4 @@ abstract class TemplateManager {
     abstract public function getHtmlTemplate($userInputData);
    
    
-   
 }
