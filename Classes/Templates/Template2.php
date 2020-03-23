@@ -24,9 +24,8 @@ class Template2 extends TemplateManager
                     'key'           => 'filename',
                     'label'         => 'File Name',
                     'required'      => true,
-                    'require_list'  => false,
                     'placeholder'   => 'Your File Name',
-                    'component'     => 'text'
+                    'component'     => 'value_text'
                 ],
                 [
                     'key'           => 'conditionals',
