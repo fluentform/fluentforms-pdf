@@ -72,11 +72,11 @@ class GlobalPdfManager
             [
                 "template1" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template1",
-                    'name'  => 'Blank Green'
+                    'name'  => 'Blank'
                 ],
                 "template2" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template2",
-                    'name'  => 'Color Red' 
+                    'name'  => 'Rubix' 
                 ]
             ]
         );
@@ -133,7 +133,6 @@ class GlobalPdfManager
                [
                     'key' => 'font',
                     'label' => 'Font family',
-                    'placeholder' => 'Your Feed Name',
                     'component' => 'dropdown',
                     'options'   => [
                         'serif' => "Serif",
@@ -143,12 +142,11 @@ class GlobalPdfManager
                [
                     'key' => 'font_size',
                     'label' => 'Font size',
-                    'placeholder' => 'Your Feed Name',
                     'component' => 'number'
                ],
                [
                     'key' => 'font_color',
-                    'label' => 'Feed Name',
+                    'label' => 'Font color',
                     'placeholder' => 'Your Feed Name',
                     'component' => 'color_picker'
                ],
