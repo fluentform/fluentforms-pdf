@@ -2,11 +2,11 @@
 
 namespace FluentFormPdf\Classes\Controller;
 
-
+use Mpdf\Mpdf as Pdf;
 use FluentForm\App\Modules\Acl\Acl;
-use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 
@@ -18,6 +18,11 @@ class GlobalPdfManager
     {
         $this->app = $app;
 
+        $this->registerHooks();
+    }
+
+    protected function registerHooks()
+    {
         // Global settings register
         add_filter('fluentform_global_settings_components', [$this, 'globalSettings']);
         add_filter('fluentform_form_settings_menu', [$this, 'settingsMenu']);
@@ -207,11 +212,11 @@ class GlobalPdfManager
 
     
     public function getPdfConfig($settings, $default)
-    {
+    {   
         return [
             'mode' => 'utf-8', 
-            'format' => isset($settings['paper_size']) ? $settings['paper_size'] : ($default['paper_size'] ? $default['paper_size'] :'A4'),
-            'orientation' => isset($settings['orientation']) ? $settings['orientation'] : ($default['orientation'] ? $default['orientation'] :'p')
+            'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size', 'A4')),
+            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation', 'p'))
         ];
     }
 
@@ -221,26 +226,50 @@ class GlobalPdfManager
     */
     public function pdfDownload() 
     {
-        if (!isset($_REQUEST['entry']) || !isset($_REQUEST['settings'])) {
-            return ;
+        $entry = Arr::get($_REQUEST, 'entry');
+
+        $settings = Arr::get($_REQUEST, 'settings');
+
+        if (!$entry || !$settings) {
+            return;
         }
+        
+        $this->renderPdf(
+            $settings['value'],
+            $entry["user_inputs"],
+            get_option('_fluentform_global_pdf_settings')
+        );
+    }
 
-        $userInputData = $_REQUEST['entry']["user_inputs"];
-        $settings = $_REQUEST['settings']['value'];
-        $default = get_option('_fluentform_global_pdf_settings');
+    protected function renderPdf($settings, $userInputData, $default)
+    {
+        $template = $this->initAndGetTemplateName($settings, $default);
 
-        $template = isset($settings['template']) ? $settings['template'] : $default['template'];
-        $filename = isset($settings['filename']) ? $settings['filename'] : 'fluentformspdf';
-        $entry_view = isset($settings['entry_view']) ? $settings['entry_view'] : ( isset($default['entry_view']) ? $default['entry_view'] : 'I');
+        $inputHtml = apply_filters(
+            "fluentform_get_pdf_html_template_{$template}", $userInputData, $settings, $default
+        );
 
+        $filename = Arr::get($settings, 'filename', 'fluentformspdf');
 
-        $allTemplates =  $this->getAvailableTemplates();
-        new $allTemplates[$template]["path"]($this->app);
-        $inputHtml = apply_filters('fluentform_get_pdf_html_template_' .$template, $userInputData, $settings, $default);
+        $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view', 'I'));
     
+        $mpdf = new Pdf(
+            $this->getPdfConfig($settings, $default)
+        );
 
-        $mpdf = new \Mpdf\Mpdf($this->getPdfConfig( $settings, $default ));
         $mpdf->WriteHTML($inputHtml);
-        $mpdf->Output( $filename, $entry_view );
+        
+        $mpdf->Output($filename, $entryView);
+    }
+
+    protected function initAndGetTemplateName($settings, $default)
+    {
+        $template = Arr::get($settings, 'template', $default['template']);
+
+        $templateClass = $this->getAvailableTemplates()[$template]['path'];
+        
+        new $templateClass($this->app);
+
+        return $template;
     }
 }
