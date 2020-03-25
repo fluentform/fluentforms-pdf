@@ -27,11 +27,11 @@ abstract class TemplateManager
             'fluentform_get_pdf_html_template_' . $this->templateKey,
             [$this, 'getHtmlTemplate'],
             10,
-            2
+            3
         );
     }
 
     abstract public function getSettingsFields();
 
-    abstract public function getHtmlTemplate($userInputData);
+    abstract public function getHtmlTemplate($userInputData, $settings, $default);
 }

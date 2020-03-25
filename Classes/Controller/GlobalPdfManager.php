@@ -7,6 +7,7 @@ use FluentForm\App\Modules\Acl\Acl;
 use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 
 class GlobalPdfManager
@@ -72,17 +73,19 @@ class GlobalPdfManager
             [
                 "template1" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template1",
-                    'name'  => 'Blank Green'
+                    'name'  => 'Blank'
                 ],
                 "template2" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template2",
-                    'name'  => 'Color Red' 
+                    'name'  => 'Rubix' 
                 ]
             ]
         );
 
         return $classes;
     }
+
+
 
     /*
     * @return [key => value]
@@ -113,64 +116,45 @@ class GlobalPdfManager
                     'label'     => 'Paper size',
                     'component' => 'dropdown',
                     'tips'      => 'All available templates are shown here, select a default template',
-                    'options'   => [
-                        'a_four'    => 'A4 (210 x 297mm)',
-                        'letter'    =>'Letter (8.5 x 11in)',
-                        'legal'     =>'Legal (8.5 x 14in)',
-                        'ledger'    =>'Ledger / Tabloid (11 x 17in)',
-                        'executive' =>'Executive (7 x 10in)',
-                        'a_zero'    => 'A0 (841 x 1189mm)',
-                        'a_one'     => 'A1 (594 x 841mm)'
-
-                    ]
+                    'options'   => PdfOptions::getPaperSizes()
                ],
                [
-                    'key' => 'template',
-                    'label' => 'Template',
+                    'key'       => 'template',
+                    'label'     => 'Template',
                     'component' => 'dropdown',
                     'options'   => $this->formattedTemplates()
                ],
-               [
-                    'key' => 'font',
-                    'label' => 'Font family',
-                    'placeholder' => 'Your Feed Name',
+                [
+                    'key'       => 'orientation',
+                    'label'     => 'Orientation',
                     'component' => 'dropdown',
-                    'options'   => [
-                        'serif' => "Serif",
-                        'mono'  => 'mono' 
-                    ]
+                    'options'   => PdfOptions::getOrientations()
                ],
                [
-                    'key' => 'font_size',
-                    'label' => 'Font size',
-                    'placeholder' => 'Your Feed Name',
+                    'key'       => 'font',
+                    'label'     => 'Font family',
+                    'component' => 'dropdown',
+                    'options'   => PdfOptions::getFonts()
+               ],
+               [
+                    'key'       => 'font_size',
+                    'label'     => 'Font size',
                     'component' => 'number'
                ],
                [
-                    'key' => 'font_color',
-                    'label' => 'Feed Name',
-                    'placeholder' => 'Your Feed Name',
+                    'key'       => 'font_color',
+                    'label'     => 'Font color',
                     'component' => 'color_picker'
                ],
                [
-                    'key' => 'entry_view',
+                    'key'   => 'entry_view',
                     'label' => 'Entry view',
                     'component' => 'radio_choice',
                     'options'   => [
-                        'view' => 'View',
-                        'download' => 'download'
+                        'I' => 'View',
+                        'D' => 'Download'
                     ]
-               ],
-                [
-                    'key' => 'background',
-                    'label' => 'Background',
-                    'component' => 'switch'
-                ],
-                [
-                    'key' => 'debug_mode',
-                    'label' => 'Debug mode',
-                    'component' => 'switch'
-                ],
+               ]
            ]
         ];
     }
@@ -221,10 +205,19 @@ class GlobalPdfManager
         wp_send_json_success($settingsFields);
     }
 
+    
+    public function getPdfConfig($settings, $default)
+    {
+        return [
+            'mode' => 'utf-8', 
+            'format' => isset($settings['paper_size']) ? $settings['paper_size'] : ($default['paper_size'] ? $default['paper_size'] :'A4'),
+            'orientation' => isset($settings['orientation']) ? $settings['orientation'] : ($default['orientation'] ? $default['orientation'] :'p')
+        ];
+    }
 
     /*
     * when download button will press
-    * Pdf rendering process will control from here
+    * Pdf rendering will control from here
     */
     public function pdfDownload() 
     {
@@ -232,18 +225,22 @@ class GlobalPdfManager
             return ;
         }
 
-        $settings = $_REQUEST['settings'];
         $userInputData = $_REQUEST['entry']["user_inputs"];
-        $templateKey = $_REQUEST['settings']['value']['template'];
+        $settings = $_REQUEST['settings']['value'];
+        $default = get_option('_fluentform_global_pdf_settings');
+
+        $template = isset($settings['template']) ? $settings['template'] : $default['template'];
+        $filename = isset($settings['filename']) ? $settings['filename'] : 'fluentformspdf';
+        $entry_view = isset($settings['entry_view']) ? $settings['entry_view'] : ( isset($default['entry_view']) ? $default['entry_view'] : 'I');
+
 
         $allTemplates =  $this->getAvailableTemplates();
+        new $allTemplates[$template]["path"]($this->app);
+        $inputHtml = apply_filters('fluentform_get_pdf_html_template_' .$template, $userInputData, $settings, $default);
+    
 
-        $template = new $allTemplates[$templateKey]["path"]($this->app);
-
-        $inputHtml = apply_filters('fluentform_get_pdf_html_template_' . $templateKey, $userInputData);
-
-        $mpdf = new \Mpdf\Mpdf();
+        $mpdf = new \Mpdf\Mpdf($this->getPdfConfig( $settings, $default ));
         $mpdf->WriteHTML($inputHtml);
-        $mpdf->Output();
+        $mpdf->Output( $filename, $entry_view );
     }
 }
