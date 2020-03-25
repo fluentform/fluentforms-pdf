@@ -2,6 +2,7 @@
 
 namespace FluentFormPdf\Classes\Controller;
 
+use Mpdf\Mpdf as Pdf;
 use FluentForm\App\Modules\Acl\Acl;
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
@@ -245,15 +246,19 @@ class GlobalPdfManager
         $template = $this->initAndGetTemplateName($settings, $default);
 
         $inputHtml = apply_filters(
-            'fluentform_get_pdf_html_template_' . $template, $userInputData, $settings, $default
+            "fluentform_get_pdf_html_template_{$template}", $userInputData, $settings, $default
         );
 
         $filename = Arr::get($settings, 'filename', 'fluentformspdf');
-        
+
         $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view', 'I'));
     
-        $mpdf = new \Mpdf\Mpdf($this->getPdfConfig($settings, $default));
+        $mpdf = new Pdf(
+            $this->getPdfConfig($settings, $default)
+        );
+
         $mpdf->WriteHTML($inputHtml);
+        
         $mpdf->Output($filename, $entryView);
     }
 
