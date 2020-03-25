@@ -76,6 +76,16 @@ class Template1 extends TemplateManager
                         'no' => 'No'
                     ]
                ],
+                [
+                    'key' => 'entry_view',
+                    'label' => 'Entry view',
+                    'tab'   =>'tab2',
+                    'component' => 'radio_choice',
+                    'options'   => [
+                        'I' => 'View',
+                        'D' => 'Download'
+                    ]
+               ],
                [
                     'key' => 'empty_fields',
                     'label' => 'Show empty fields',
@@ -102,7 +112,7 @@ class Template1 extends TemplateManager
         ];
     }
 
-    public function getHtmlTemplate ($userInputData) 
+    public function getHtmlTemplate ($userInputData, $settings, $default) 
     {
         
         $inputHtml = '';

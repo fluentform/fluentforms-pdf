@@ -125,8 +125,8 @@ class GlobalPdfManager
                     'options'   => $this->formattedTemplates()
                ],
                 [
-                    'key' => 'orientation',
-                    'label' => 'Orientation',
+                    'key'       => 'orientation',
+                    'label'     => 'Orientation',
                     'component' => 'dropdown',
                     'options'   => PdfOptions::getOrientations()
                ],
@@ -151,20 +151,10 @@ class GlobalPdfManager
                     'label' => 'Entry view',
                     'component' => 'radio_choice',
                     'options'   => [
-                        'view' => 'View',
-                        'download' => 'download'
+                        'I' => 'View',
+                        'D' => 'Download'
                     ]
-               ],
-                [
-                    'key' => 'background',
-                    'label' => 'Background',
-                    'component' => 'switch'
-                ],
-                [
-                    'key' => 'debug_mode',
-                    'label' => 'Debug mode',
-                    'component' => 'switch'
-                ],
+               ]
            ]
         ];
     }
@@ -215,6 +205,15 @@ class GlobalPdfManager
         wp_send_json_success($settingsFields);
     }
 
+    
+    public function getPdfConfig($settings, $default)
+    {
+        return [
+            'mode' => 'utf-8', 
+            'format' => isset($settings['paper_size']) ? $settings['paper_size'] : ($default['paper_size'] ? $default['paper_size'] :'A4'),
+            'orientation' => isset($settings['orientation']) ? $settings['orientation'] : ($default['orientation'] ? $default['orientation'] :'p')
+        ];
+    }
 
     /*
     * when download button will press
@@ -226,20 +225,22 @@ class GlobalPdfManager
             return ;
         }
 
-        $settings = $_REQUEST['settings'];
         $userInputData = $_REQUEST['entry']["user_inputs"];
-        $templateKey = $_REQUEST['settings']['value']['template'];
+        $settings = $_REQUEST['settings']['value'];
+        $default = get_option('_fluentform_global_pdf_settings');
+
+        $template = isset($settings['template']) ? $settings['template'] : $default['template'];
+        $filename = isset($settings['filename']) ? $settings['filename'] : 'fluentformspdf';
+        $entry_view = isset($settings['entry_view']) ? $settings['entry_view'] : ( isset($default['entry_view']) ? $default['entry_view'] : 'I');
+
 
         $allTemplates =  $this->getAvailableTemplates();
+        new $allTemplates[$template]["path"]($this->app);
+        $inputHtml = apply_filters('fluentform_get_pdf_html_template_' .$template, $userInputData, $settings, $default);
+    
 
-        $template = new $allTemplates[$templateKey]["path"]($this->app);
-
-        $inputHtml = apply_filters('fluentform_get_pdf_html_template_' . $templateKey, $userInputData);
-
-        $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4-L', 'orientation' => 'P']);
-
-        //
+        $mpdf = new \Mpdf\Mpdf($this->getPdfConfig( $settings, $default ));
         $mpdf->WriteHTML($inputHtml);
-        $mpdf->Output('yourFileName.pdf', 'I');
+        $mpdf->Output( $filename, $entry_view );
     }
 }

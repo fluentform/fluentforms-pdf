@@ -84,13 +84,13 @@ class Template2 extends TemplateManager
                     'component' => 'color_picker'
                ],
                [
-                    'key' => 'form_title',
+                    'key' => 'entry_view',
                     'label' => 'Entry view',
                     'tab'   =>'tab2',
                     'component' => 'radio_choice',
                     'options'   => [
-                        'yes' => 'Yes',
-                        'no' => 'No'
+                        'I' => 'View',
+                        'D' => 'Download'
                     ]
                ],
                [
@@ -118,7 +118,7 @@ class Template2 extends TemplateManager
         ];
     }
 
-    public function getHtmlTemplate ($userInputData) 
+    public function getHtmlTemplate ($userInputData, $settings, $default) 
     {
 
         $inputHtml = '';
