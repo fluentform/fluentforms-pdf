@@ -4,6 +4,7 @@ namespace FluentFormPdf\Classes\Templates;
 
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 class Template2 extends TemplateManager
 {
@@ -50,26 +51,21 @@ class Template2 extends TemplateManager
                     'component' => 'dropdown',
                     'tab'       => 'tab2',
                     'tips'      => 'select a pdf paper size',
-                    'options'   => [
-                        'a_four'    => 'A4 (210 x 297mm)',
-                        'letter'    =>'Letter (8.5 x 11in)',
-                        'legal'     =>'Legal (8.5 x 14in)',
-                        'ledger'    =>'Ledger / Tabloid (11 x 17in)',
-                        'executive' =>'Executive (7 x 10in)',
-                        'a_zero'    => 'A0 (841 x 1189mm)',
-                        'a_one'     => 'A1 (594 x 841mm)'
-
-                    ]
+                    'options'   => PdfOptions::getPaperSizes()
+                ],
+                [
+                    'key'       => 'orientation',
+                    'label'     => 'Orientation',
+                    'tab'       => 'tab2',
+                    'component' => 'dropdown',
+                    'options'   => PdfOptions::getOrientations()
                 ],
                 [
                     'key' => 'font',
                     'label' => 'Font family',
                     'component' => 'dropdown',
                     'tab'       => 'tab2',
-                    'options'   => [
-                        'serif' => "Serif",
-                        'mono'  => 'mono' 
-                    ]
+                    'options'   => PdfOptions::getFonts()
                ],
                 [
                     'key' => 'font_color',
@@ -122,7 +118,8 @@ class Template2 extends TemplateManager
         ];
     }
 
-    public function getHtmlTemplate ($userInputData) {
+    public function getHtmlTemplate ($userInputData) 
+    {
 
         $inputHtml = '';
         

@@ -4,6 +4,7 @@ namespace FluentFormPdf\Classes\Templates;
 
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 class Template1 extends TemplateManager
 {
@@ -29,9 +30,10 @@ class Template1 extends TemplateManager
                     'component'     => 'value_text'
                 ],
                 [
-                    'key'           => 'pdfheader',
-                    'label'         => 'PDF Header',
-                    'tab'           => 'tab2',
+                    'key'           => 'header',
+                    'label'         => 'Pdf header',
+                    'tab'           => 'tab1',
+                    'tips'          => 'This text will be added to the header section of pdf',
                     'placeholder'   => 'Your Pdf Header',
                     'component'     => 'value_text'
                 ],
@@ -48,30 +50,25 @@ class Template1 extends TemplateManager
                     'component' => 'dropdown',
                     'tab'       => 'tab2',
                     'tips'      => 'All available templates are shown here, select a default template',
-                    'options'   => [
-                        'a_four'    => 'A4 (210 x 297mm)',
-                        'letter'    =>'Letter (8.5 x 11in)',
-                        'legal'     =>'Legal (8.5 x 14in)',
-                        'ledger'    =>'Ledger / Tabloid (11 x 17in)',
-                        'executive' =>'Executive (7 x 10in)',
-                        'a_zero'    => 'A0 (841 x 1189mm)',
-                        'a_one'     => 'A1 (594 x 841mm)'
-
-                    ]
+                    'options'   => PdfOptions::getPaperSizes()
                 ],
+                [
+                    'key'       => 'orientation',
+                    'label'     => 'Orientation',
+                    'tab'       => 'tab2',
+                    'component' => 'dropdown',
+                    'options'   => PdfOptions::getOrientations()
+               ],
                 [
                     'key' => 'font',
                     'label' => 'Font family',
                     'component' => 'dropdown',
                     'tab'       => 'tab2',
-                    'options'   => [
-                        'serif' => "Serif",
-                        'mono'  => 'mono' 
-                    ]
+                    'options'   => PdfOptions::getFonts()
                ],
                [
                     'key' => 'form_title',
-                    'label' => 'Entry view',
+                    'label' => 'Show form title',
                     'tab'   =>'tab2',
                     'component' => 'radio_choice',
                     'options'   => [
@@ -105,7 +102,8 @@ class Template1 extends TemplateManager
         ];
     }
 
-    public function getHtmlTemplate ($userInputData) {
+    public function getHtmlTemplate ($userInputData) 
+    {
         
         $inputHtml = '';
      

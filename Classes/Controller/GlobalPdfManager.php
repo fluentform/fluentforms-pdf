@@ -7,6 +7,7 @@ use FluentForm\App\Modules\Acl\Acl;
 use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 
 class GlobalPdfManager
@@ -84,6 +85,8 @@ class GlobalPdfManager
         return $classes;
     }
 
+
+
     /*
     * @return [key => value]
     * processed for dropdown fields
@@ -113,45 +116,38 @@ class GlobalPdfManager
                     'label'     => 'Paper size',
                     'component' => 'dropdown',
                     'tips'      => 'All available templates are shown here, select a default template',
-                    'options'   => [
-                        'a_four'    => 'A4 (210 x 297mm)',
-                        'letter'    =>'Letter (8.5 x 11in)',
-                        'legal'     =>'Legal (8.5 x 14in)',
-                        'ledger'    =>'Ledger / Tabloid (11 x 17in)',
-                        'executive' =>'Executive (7 x 10in)',
-                        'a_zero'    => 'A0 (841 x 1189mm)',
-                        'a_one'     => 'A1 (594 x 841mm)'
-
-                    ]
+                    'options'   => PdfOptions::getPaperSizes()
                ],
                [
-                    'key' => 'template',
-                    'label' => 'Template',
+                    'key'       => 'template',
+                    'label'     => 'Template',
                     'component' => 'dropdown',
                     'options'   => $this->formattedTemplates()
                ],
-               [
-                    'key' => 'font',
-                    'label' => 'Font family',
+                [
+                    'key' => 'orientation',
+                    'label' => 'Orientation',
                     'component' => 'dropdown',
-                    'options'   => [
-                        'serif' => "Serif",
-                        'mono'  => 'mono' 
-                    ]
+                    'options'   => PdfOptions::getOrientations()
                ],
                [
-                    'key' => 'font_size',
-                    'label' => 'Font size',
+                    'key'       => 'font',
+                    'label'     => 'Font family',
+                    'component' => 'dropdown',
+                    'options'   => PdfOptions::getFonts()
+               ],
+               [
+                    'key'       => 'font_size',
+                    'label'     => 'Font size',
                     'component' => 'number'
                ],
                [
-                    'key' => 'font_color',
-                    'label' => 'Font color',
-                    'placeholder' => 'Your Feed Name',
+                    'key'       => 'font_color',
+                    'label'     => 'Font color',
                     'component' => 'color_picker'
                ],
                [
-                    'key' => 'entry_view',
+                    'key'   => 'entry_view',
                     'label' => 'Entry view',
                     'component' => 'radio_choice',
                     'options'   => [
@@ -222,7 +218,7 @@ class GlobalPdfManager
 
     /*
     * when download button will press
-    * Pdf rendering process will control from here
+    * Pdf rendering will control from here
     */
     public function pdfDownload() 
     {
@@ -240,8 +236,10 @@ class GlobalPdfManager
 
         $inputHtml = apply_filters('fluentform_get_pdf_html_template_' . $templateKey, $userInputData);
 
-        $mpdf = new \Mpdf\Mpdf();
+        $mpdf = new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => 'A4-L', 'orientation' => 'P']);
+
+        //
         $mpdf->WriteHTML($inputHtml);
-        $mpdf->Output();
+        $mpdf->Output('yourFileName.pdf', 'I');
     }
 }
