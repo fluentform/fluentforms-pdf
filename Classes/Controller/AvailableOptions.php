@@ -67,7 +67,7 @@ class AvailableOptions
     {
         return [
             'P' => "Portrait",
-            'L'  => 'Landscape' 
+            'L' => 'Landscape' 
         ];
     }
 
@@ -77,6 +77,21 @@ class AvailableOptions
             'default'   => 'Default',
             'serif'     => 'Serif',
             'monospace' => 'Monospace' 
+        ];
+    }
+
+    public static function getDefaultSettings() 
+    {
+        return [
+            'font_size'     => '16',
+            "paper_size"    => 'A4',
+            'template'      => 'template1',
+            'orientation'   => 'P',
+            'font'          => 'default',
+            'font_color'    => '#000000',
+            'entry_view'    => 'I',
+            'reverse_text'  => 'no',
+            'accent_color'  => '#000000'
         ];
     }
 

@@ -4,6 +4,7 @@ namespace FluentFormPdf\Classes\Templates;
 
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 class Template2 extends TemplateManager
@@ -118,15 +119,37 @@ class Template2 extends TemplateManager
         ];
     }
 
-    public function getHtmlTemplate ($userInputData, $settings, $default) 
+    
+    public function getStyles ($settings, $default) 
     {
+        $color = Arr::get(
+            $settings, 'font_color', 
+            Arr::get($default, 'font_color')
+        );
+        $accent = Arr::get(
+            $settings, 'accent_color', 
+            Arr::get($default, 'accent_color')
+        );
 
-        $inputHtml = '';
-        
-        foreach ($userInputData as $key => $value) {
-                $inputHtml .=  '<p style="color:red;">'.$key . ': ' .$value. '</p>';
+        return 'table {border-collapse: collapse;width: 100%;}
+            td {min-width:20%; color:'.$color.';border: 1px solid '.$accent.'; 
+            min-width: 200px; text-align: left; padding: 8px;}'; 
+    }
+
+    public function getHtmlTemplate ($data, $settings, $default) 
+    {
+        $inputHtml = '<div><table>';
+        foreach (Arr::get($data, 'inputs') as $value => $key) {
+            $inputHtml .= '<tr>';
+            $inputHtml .= '<td>'.$key .'</td>';
+            $inputHtml .= '<td>'.$value .'</td>';
+            $inputHtml .= '</tr>';
         };
+         $inputHtml .= '</table></div>';
 
-        return $inputHtml;
+        return [
+            'html' => wp_unslash($inputHtml),
+            'styles' => $this->getStyles($settings, $default)
+        ];
     }
 }

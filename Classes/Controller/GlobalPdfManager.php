@@ -3,9 +3,7 @@
 namespace FluentFormPdf\Classes\Controller;
 
 use Mpdf\Mpdf as Pdf;
-use FluentForm\App\Modules\Acl\Acl;
 use FluentForm\Framework\Foundation\Application;
-use FluentFormPdf\Classes\Templates\TemplateManager;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
@@ -151,6 +149,12 @@ class GlobalPdfManager
                     'label'     => 'Font color',
                     'component' => 'color_picker'
                ],
+                [
+                    'key' => 'accent_color',
+                    'label' => 'Accent color',
+                    'tips'  => 'The accent color is used for the page, section titles and the border.',
+                    'component' => 'color_picker'
+               ],
                [
                     'key'   => 'entry_view',
                     'label' => 'Entry view',
@@ -158,6 +162,16 @@ class GlobalPdfManager
                     'options'   => [
                         'I' => 'View',
                         'D' => 'Download'
+                    ]
+                ],
+                [
+                    'key' => 'reverse_text',
+                    'label' => 'Reverse text',
+                    'tips'   =>'Script like Arabic and Hebrew are written right to left.',
+                    'component' => 'radio_choice',
+                    'options'   => [
+                        'yes' => 'Yes',
+                        'no' => 'No'
                     ]
                ]
            ]
@@ -215,8 +229,8 @@ class GlobalPdfManager
     {   
         return [
             'mode' => 'utf-8', 
-            'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size', 'A4')),
-            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation', 'p'))
+            'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size')),
+            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation'))
         ];
     }
 
@@ -226,38 +240,49 @@ class GlobalPdfManager
     */
     public function pdfDownload() 
     {
-        $entry = Arr::get($_REQUEST, 'entry');
+        $data = Arr::get($_REQUEST, 'entry');
+
+        $data['inputs'] = array_combine(
+            Arr::get($data, 'user_inputs'),
+            Arr::get($_REQUEST, 'labels')
+        );
 
         $settings = Arr::get($_REQUEST, 'settings');
 
-        if (!$entry || !$settings) {
+        if (!$data || !$settings) {
             return;
         }
-        
+
+        $default = get_option('_fluentform_global_pdf_settings');
+        if (!$default) {
+            $default = PdfOptions::getDefaultSettings();
+        }
+
         $this->renderPdf(
             $settings['value'],
-            $entry["user_inputs"],
-            get_option('_fluentform_global_pdf_settings')
+            $data,
+            $default
         );
     }
 
-    protected function renderPdf($settings, $userInputData, $default)
+    protected function renderPdf($settings, $data, $default)
     {
         $template = $this->initAndGetTemplateName($settings, $default);
 
-        $inputHtml = apply_filters(
-            "fluentform_get_pdf_html_template_{$template}", $userInputData, $settings, $default
+        $inputData = apply_filters(
+            "fluentform_get_pdf_html_template_{$template}", $data, $settings, $default
         );
 
-        $filename = Arr::get($settings, 'filename', 'fluentformspdf');
+        $filename = Arr::get($settings, 'filename', 'fluentformpdf');
 
-        $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view', 'I'));
+        $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view'));
     
         $mpdf = new Pdf(
             $this->getPdfConfig($settings, $default)
         );
 
-        $mpdf->WriteHTML($inputHtml);
+        $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
+        $mpdf->WriteHTML(Arr::get($inputData, 'html'));
         
         $mpdf->Output($filename, $entryView);
     }
