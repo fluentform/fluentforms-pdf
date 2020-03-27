@@ -159,6 +159,16 @@ class GlobalPdfManager
                         'I' => 'View',
                         'D' => 'Download'
                     ]
+                ],
+                [
+                    'key' => 'reverse_text',
+                    'label' => 'Reverse text',
+                    'tips'   =>'Script like Arabic and Hebrew are written right to left.',
+                    'component' => 'radio_choice',
+                    'options'   => [
+                        'yes' => 'Yes',
+                        'no' => 'No'
+                    ]
                ]
            ]
         ];
@@ -215,8 +225,8 @@ class GlobalPdfManager
     {   
         return [
             'mode' => 'utf-8', 
-            'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size', 'A4')),
-            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation', 'p'))
+            'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size')),
+            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation'))
         ];
     }
 
@@ -233,11 +243,16 @@ class GlobalPdfManager
         if (!$entry || !$settings) {
             return;
         }
-        
+
+        $default = get_option('_fluentform_global_pdf_settings');
+        if (!$default) {
+            $default = PdfOptions::getDefaultSettings();
+        }
+
         $this->renderPdf(
             $settings['value'],
             $entry["user_inputs"],
-            get_option('_fluentform_global_pdf_settings')
+            $default
         );
     }
 
@@ -249,9 +264,9 @@ class GlobalPdfManager
             "fluentform_get_pdf_html_template_{$template}", $userInputData, $settings, $default
         );
 
-        $filename = Arr::get($settings, 'filename', 'fluentformspdf');
+        $filename = Arr::get($settings, 'filename', 'fluentformpdf');
 
-        $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view', 'I'));
+        $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view'));
     
         $mpdf = new Pdf(
             $this->getPdfConfig($settings, $default)
