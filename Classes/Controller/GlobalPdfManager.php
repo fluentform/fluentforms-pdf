@@ -3,9 +3,7 @@
 namespace FluentFormPdf\Classes\Controller;
 
 use Mpdf\Mpdf as Pdf;
-use FluentForm\App\Modules\Acl\Acl;
 use FluentForm\Framework\Foundation\Application;
-use FluentFormPdf\Classes\Templates\TemplateManager;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
@@ -236,11 +234,16 @@ class GlobalPdfManager
     */
     public function pdfDownload() 
     {
-        $entry = Arr::get($_REQUEST, 'entry');
+        $data = Arr::get($_REQUEST, 'entry');
+
+        $data['inputs'] = array_combine(
+            Arr::get($data, 'user_inputs'),
+            Arr::get($_REQUEST, 'labels')
+        );
 
         $settings = Arr::get($_REQUEST, 'settings');
 
-        if (!$entry || !$settings) {
+        if (!$data || !$settings) {
             return;
         }
 
@@ -251,17 +254,17 @@ class GlobalPdfManager
 
         $this->renderPdf(
             $settings['value'],
-            $entry["user_inputs"],
+            $data,
             $default
         );
     }
 
-    protected function renderPdf($settings, $userInputData, $default)
+    protected function renderPdf($settings, $data, $default)
     {
         $template = $this->initAndGetTemplateName($settings, $default);
 
         $inputHtml = apply_filters(
-            "fluentform_get_pdf_html_template_{$template}", $userInputData, $settings, $default
+            "fluentform_get_pdf_html_template_{$template}", $data, $settings, $default
         );
 
         $filename = Arr::get($settings, 'filename', 'fluentformpdf');

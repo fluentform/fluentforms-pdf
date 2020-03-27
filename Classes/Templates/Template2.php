@@ -4,6 +4,7 @@ namespace FluentFormPdf\Classes\Templates;
 
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
+use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 class Template2 extends TemplateManager
@@ -118,13 +119,13 @@ class Template2 extends TemplateManager
         ];
     }
 
-    public function getHtmlTemplate ($userInputData, $settings, $default) 
+    public function getHtmlTemplate ($data, $settings, $default) 
     {
 
         $inputHtml = '';
         
-        foreach ($userInputData as $key => $value) {
-                $inputHtml .=  '<p style="color:red;">'.$key . ': ' .$value. '</p>';
+        foreach (Arr::get($data, 'inputs') as $value => $key) {
+            $inputHtml .=  '<p style="color:red;">'.$key . ': ' .$value. '</p>';
         };
 
         return $inputHtml;

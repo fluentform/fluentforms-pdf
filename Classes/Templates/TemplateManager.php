@@ -30,8 +30,8 @@ abstract class TemplateManager
             3
         );
     }
-
+    
     abstract public function getSettingsFields();
 
-    abstract public function getHtmlTemplate($userInputData, $settings, $default);
+    abstract public function getHtmlTemplate($data, $settings, $default);
 }
