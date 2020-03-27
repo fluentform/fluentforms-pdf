@@ -149,6 +149,12 @@ class GlobalPdfManager
                     'label'     => 'Font color',
                     'component' => 'color_picker'
                ],
+                [
+                    'key' => 'accent_color',
+                    'label' => 'Accent color',
+                    'tips'  => 'The accent color is used for the page, section titles and the border.',
+                    'component' => 'color_picker'
+               ],
                [
                     'key'   => 'entry_view',
                     'label' => 'Entry view',
@@ -263,7 +269,7 @@ class GlobalPdfManager
     {
         $template = $this->initAndGetTemplateName($settings, $default);
 
-        $inputHtml = apply_filters(
+        $inputData = apply_filters(
             "fluentform_get_pdf_html_template_{$template}", $data, $settings, $default
         );
 
@@ -275,7 +281,8 @@ class GlobalPdfManager
             $this->getPdfConfig($settings, $default)
         );
 
-        $mpdf->WriteHTML($inputHtml);
+        $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
+        $mpdf->WriteHTML(Arr::get($inputData, 'html'));
         
         $mpdf->Output($filename, $entryView);
     }

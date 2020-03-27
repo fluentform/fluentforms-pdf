@@ -90,7 +90,8 @@ class AvailableOptions
             'font'          => 'default',
             'font_color'    => '#000000',
             'entry_view'    => 'I',
-            "reverse_text"  => "no"
+            'reverse_text'  => 'no',
+            'accent_color'  => '#000000'
         ];
     }
 

@@ -33,5 +33,7 @@ abstract class TemplateManager
     
     abstract public function getSettingsFields();
 
+    abstract public function getStyles($settings, $default);
+
     abstract public function getHtmlTemplate($data, $settings, $default);
 }
