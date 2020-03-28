@@ -91,8 +91,14 @@ class AvailableOptions
             'font_color'    => '#000000',
             'entry_view'    => 'I',
             'reverse_text'  => 'no',
-            'accent_color'  => '#000000'
+            'accent_color'  => '#CCCCCC',
+            'filename'      => 'fluentformpdf'
         ];
+    }
+
+    public static function slugify($string)
+    {
+        return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $string), '-'));
     }
 
 

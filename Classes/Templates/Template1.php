@@ -68,16 +68,6 @@ class Template1 extends TemplateManager
                     'tab'       => 'tab2',
                     'options'   => PdfOptions::getFonts()
                ],
-               [
-                    'key' => 'form_title',
-                    'label' => 'Show form title',
-                    'tab'   =>'tab2',
-                    'component' => 'radio_choice',
-                    'options'   => [
-                        'yes' => 'Yes',
-                        'no' => 'No'
-                    ]
-               ],
                 [
                     'key' => 'entry_view',
                     'label' => 'Entry view',
@@ -117,24 +107,50 @@ class Template1 extends TemplateManager
 
     public function getStyles ($settings, $default) 
     {
-        $color = Arr::get($default, 'font_color', '#000000');
-        $accent = Arr::get($default, 'accent_color', '#000000');
-        return 'table {width: 100%;}
-            tr:nth-child(even){background-color: #dddddd};
-            td { color:'.$color.';border: 1px solid '.$accent.'; 
-            min-width: 200px; text-align: left; padding: 8px;}'; 
+        $color = Arr::get($default, 'font_color');
+        $accent = Arr::get($default, 'accent_color');
+        $font = Arr::get($settings, 'font', Arr::get($default, 'font'));
+        $fontSize = Arr::get($default, 'font_size');
+
+        $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
+            tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
+            td{color:'.$color.'; font-size:'.$fontSize.' px!important; text-align: left; padding:10px;}
+            .ff-pdf-header {text-align:center;}';
+
+        if ( $font && !($font=='default')) {
+            $styles .= '.ff-pdf-table tr td, .ff-pdf-header {font-family:'.$font.'}';
+        }
+        return $styles;
+            
     }
 
     public function getHtmlTemplate ($data, $settings, $default) 
-    {
-        $inputHtml = '<div><table>';
-        foreach (Arr::get($data, 'inputs') as $value => $key) {
+    {   
+        $header = Arr::get($settings, 'header');
+        $inputs = Arr::get($data, 'user_inputs');
+        $labels = Arr::get($data, 'labels');
+        if ( Arr::get($settings, 'empty_fields') == 'no') {
+            $inputs = array_filter($inputs);
+        };
+
+        $inputHtml = '<div class="ff-pdf-wrapper">';
+        if ( $header) {
+            $inputHtml .= '<h3 class="ff-pdf-header">'. $header .'</h3>';
+        };
+
+        $inputHtml .= '<div class="ff-pdf-table"><table>';
+        foreach ($inputs as $key => $value) {
             $inputHtml .= '<tr>';
-            $inputHtml .= '<td>'.$key .'</td>';
-            $inputHtml .= '<td>'.$value .'</td>';
+            $inputHtml .= '<td width="20%">'.$labels[$key] .'</td>';
+            if (strpos($key, 'image-upload')!== false) {
+                $inputHtml .= '<td width="20%"><img src="'.$value.'"/></td>';
+            }else {
+                $inputHtml .= '<td width="20%">'.$value.'</td>';
+            }
+           
             $inputHtml .= '</tr>';
         };
-        $inputHtml .= '</table></div>';
+        $inputHtml .= '</table></div></div>';
 
         return [
             'html' => wp_unslash($inputHtml),

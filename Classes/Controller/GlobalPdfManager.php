@@ -6,7 +6,7 @@ use Mpdf\Mpdf as Pdf;
 use FluentForm\Framework\Foundation\Application;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
-
+use FluentForm\App\Services\FormBuilder\ShortCodeParser as ShortCodeParser;
 
 class GlobalPdfManager
 {
@@ -241,11 +241,7 @@ class GlobalPdfManager
     public function pdfDownload() 
     {
         $data = Arr::get($_REQUEST, 'entry');
-
-        $data['inputs'] = array_combine(
-            Arr::get($data, 'user_inputs'),
-            Arr::get($_REQUEST, 'labels')
-        );
+        $data['labels'] = Arr::get($_REQUEST, 'labels');
 
         $settings = Arr::get($_REQUEST, 'settings');
 
@@ -256,6 +252,12 @@ class GlobalPdfManager
         $default = get_option('_fluentform_global_pdf_settings');
         if (!$default) {
             $default = PdfOptions::getDefaultSettings();
+        } else {
+            foreach($default as $key => $value) {
+                if($value == '') {
+                    $default[$key] = PdfOptions::getDefaultSettings()[$key];
+                }
+            }
         }
 
         $this->renderPdf(
@@ -269,11 +271,15 @@ class GlobalPdfManager
     {
         $template = $this->initAndGetTemplateName($settings, $default);
 
+        $settings = ShortCodeParser::parse(
+            $settings, 
+            Arr::get($data,'id'), 
+            Arr::get($data,'user_inputs'), 
+        );
+
         $inputData = apply_filters(
             "fluentform_get_pdf_html_template_{$template}", $data, $settings, $default
         );
-
-        $filename = Arr::get($settings, 'filename', 'fluentformpdf');
 
         $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view'));
     
@@ -281,10 +287,21 @@ class GlobalPdfManager
             $this->getPdfConfig($settings, $default)
         );
 
+        $filename = Arr::get($settings, 'filename');
+        if ( $filename == '') {
+            $filename = Arr::get($default, 'filename');
+        }
+        
+        if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text')))== 'yes') {
+            $mpdf->SetDirectionality('rtl');
+        }
+        
         $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
         $mpdf->WriteHTML(Arr::get($inputData, 'html'));
-        
-        $mpdf->Output($filename, $entryView);
+        $mpdf->Output(
+            PdfOptions::slugify($filename), 
+            $entryView
+        );
     }
 
     protected function initAndGetTemplateName($settings, $default)
