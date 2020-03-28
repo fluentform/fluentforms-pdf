@@ -139,23 +139,28 @@ class Template2 extends TemplateManager
             
     }
 
-     public function getHtmlTemplate ($data, $settings, $default) 
+    public function getHtmlTemplate ($data, $settings, $default) 
     {
         $header = Arr::get($settings, 'header');
         $inputs = Arr::get($data, 'user_inputs');
+        $labels = Arr::get($data, 'labels');
+        if ( Arr::get($settings, 'empty_fields') == 'no') {
+            $inputs = array_filter($inputs);
+        };
+
         $inputHtml = '<div class="ff-pdf-wrapper">';
         if ( $header) {
             $inputHtml .= '<h3 class="ff-pdf-header">'. $header .'</h3>';
-        }
+        };
 
         $inputHtml .= '<div class="ff-pdf-table"><table>';
-        foreach (Arr::get($data, 'labels') as $key => $value) {
+        foreach ($inputs as $key => $value) {
             $inputHtml .= '<tr>';
-            $inputHtml .= '<td width="20%">'.$value .'</td>';
+            $inputHtml .= '<td width="20%">'.$labels[$key] .'</td>';
             if (strpos($key, 'image-upload')!== false) {
-                $inputHtml .= '<td width="20%"><img src="'.$inputs[$key] .'"/></td>';
+                $inputHtml .= '<td width="20%"><img src="'.$value.'"/></td>';
             }else {
-                $inputHtml .= '<td width="20%">'.$inputs[$key] .'</td>';
+                $inputHtml .= '<td width="20%">'.$value.'</td>';
             }
            
             $inputHtml .= '</tr>';
