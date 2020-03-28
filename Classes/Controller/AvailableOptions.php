@@ -91,7 +91,7 @@ class AvailableOptions
             'font_color'    => '#000000',
             'entry_view'    => 'I',
             'reverse_text'  => 'no',
-            'accent_color'  => '#000000'
+            'accent_color'  => '#CCCCCC'
         ];
     }
 

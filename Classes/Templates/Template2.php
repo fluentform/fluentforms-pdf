@@ -122,30 +122,45 @@ class Template2 extends TemplateManager
     
     public function getStyles ($settings, $default) 
     {
-        $color = Arr::get(
-            $settings, 'font_color', 
-            Arr::get($default, 'font_color')
-        );
-        $accent = Arr::get(
-            $settings, 'accent_color', 
-            Arr::get($default, 'accent_color')
-        );
+        $color = Arr::get($settings, 'font_color', Arr::get($default, 'font_color'));
+        $accent = Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color'));
+        $font = Arr::get($settings, 'font', Arr::get($default, 'font'));
+        $fontSize = Arr::get($default, 'font_size');
 
-        return 'table {border-collapse: collapse;width: 100%;}
-            td {min-width:20%; color:'.$color.';border: 1px solid '.$accent.'; 
-            min-width: 200px; text-align: left; padding: 8px;}'; 
+        $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
+            tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
+            td{color:'.$color.'; font-size:'.$fontSize.' px!important; text-align: left; padding:10px;}
+            .ff-pdf-header {text-align:center;}';
+
+        if ( $font && !($font=='default')) {
+            $styles .= '.ff-pdf-table tr td, .ff-pdf-header {font-family:'.$font.'}';
+        }
+        return $styles;
+            
     }
 
-    public function getHtmlTemplate ($data, $settings, $default) 
+     public function getHtmlTemplate ($data, $settings, $default) 
     {
-        $inputHtml = '<div><table>';
-        foreach (Arr::get($data, 'inputs') as $value => $key) {
+        $header = Arr::get($settings, 'header');
+        $inputs = Arr::get($data, 'user_inputs');
+        $inputHtml = '<div class="ff-pdf-wrapper">';
+        if ( $header) {
+            $inputHtml .= '<h3 class="ff-pdf-header">'. $header .'</h3>';
+        }
+
+        $inputHtml .= '<div class="ff-pdf-table"><table>';
+        foreach (Arr::get($data, 'labels') as $key => $value) {
             $inputHtml .= '<tr>';
-            $inputHtml .= '<td>'.$key .'</td>';
-            $inputHtml .= '<td>'.$value .'</td>';
+            $inputHtml .= '<td width="20%">'.$value .'</td>';
+            if (strpos($key, 'image-upload')!== false) {
+                $inputHtml .= '<td width="20%"><img src="'.$inputs[$key] .'"/></td>';
+            }else {
+                $inputHtml .= '<td width="20%">'.$inputs[$key] .'</td>';
+            }
+           
             $inputHtml .= '</tr>';
         };
-         $inputHtml .= '</table></div>';
+        $inputHtml .= '</table></div></div>';
 
         return [
             'html' => wp_unslash($inputHtml),
