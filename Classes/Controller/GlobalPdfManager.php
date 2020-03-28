@@ -291,6 +291,11 @@ class GlobalPdfManager
         if ( $filename == '') {
             $filename = Arr::get($default, 'filename');
         }
+        
+        if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text')))== 'yes') {
+            $mpdf->SetDirectionality('rtl');
+        }
+        
         $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
         $mpdf->WriteHTML(Arr::get($inputData, 'html'));
         $mpdf->Output(
