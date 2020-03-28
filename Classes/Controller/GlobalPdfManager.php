@@ -259,7 +259,7 @@ class GlobalPdfManager
                 }
             }
         }
-        
+
         $this->renderPdf(
             $settings['value'],
             $data,
@@ -270,6 +270,7 @@ class GlobalPdfManager
     protected function renderPdf($settings, $data, $default)
     {
         $template = $this->initAndGetTemplateName($settings, $default);
+
         $settings = ShortCodeParser::parse(
             $settings, 
             Arr::get($data,'id'), 
@@ -280,18 +281,22 @@ class GlobalPdfManager
             "fluentform_get_pdf_html_template_{$template}", $data, $settings, $default
         );
 
-        $filename = Arr::get($settings, 'filename', 'fluentformpdf');
-
         $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view'));
     
         $mpdf = new Pdf(
             $this->getPdfConfig($settings, $default)
         );
 
+        $filename = Arr::get($settings, 'filename');
+        if ( $filename == '') {
+            $filename = Arr::get($default, 'filename');
+        }
         $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
         $mpdf->WriteHTML(Arr::get($inputData, 'html'));
-        
-        $mpdf->Output($filename, $entryView);
+        $mpdf->Output(
+            PdfOptions::slugify($filename), 
+            $entryView
+        );
     }
 
     protected function initAndGetTemplateName($settings, $default)
