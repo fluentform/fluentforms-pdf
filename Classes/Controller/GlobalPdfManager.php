@@ -292,6 +292,7 @@ class GlobalPdfManager
             $filename = Arr::get($default, 'filename');
         }
         
+        // For the right to left text like arabic or hebrew
         if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text')))== 'yes') {
             $mpdf->SetDirectionality('rtl');
         }

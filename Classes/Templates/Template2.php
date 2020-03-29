@@ -168,8 +168,8 @@ class Template2 extends TemplateManager
         $inputHtml .= '</table></div></div>';
 
         return [
-            'html' => wp_unslash($inputHtml),
-            'styles' => $this->getStyles($settings, $default)
+            'html'  => wp_unslash($inputHtml),
+            'styles'=> $this->getStyles($settings, $default)
         ];
     }
 }
