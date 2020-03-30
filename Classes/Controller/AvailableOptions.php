@@ -122,6 +122,12 @@ class AvailableOptions
                 'options'   => self::getFonts()
             ],
             [
+                'key'       => 'font_size',
+                'label'     => 'Font size',
+                'tab'       => 'tab2',
+                'component' => 'number'
+            ],
+            [
                 'key' => 'font_color',
                 'label' => 'Font color',
                 'tab'   => 'tab2',

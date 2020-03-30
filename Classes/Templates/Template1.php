@@ -21,6 +21,7 @@ class Template1 extends TemplateManager
     
     public function getSettingsFields()
     {
+        // Add any custom settings here, but the tab must be declare
         $customSettings = [
             [
                 'key'           => 'filename',
@@ -36,7 +37,7 @@ class Template1 extends TemplateManager
                 'tab'           => 'tab1',
                 'tips'          => 'This text will be added to the header section of pdf',
                 'placeholder'   => 'Your Pdf Header',
-                'component'     => 'value_text'
+                'component'     => 'editor'
             ],
             [
                 'key'           => 'conditionals',
@@ -54,13 +55,19 @@ class Template1 extends TemplateManager
        )];
     }
 
+    public function getPreferences($settings, $default) {
+       return [ 
+        'color' => Arr::get($settings, 'font_color', Arr::get($default, 'font_color')),
+        'accent' => Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color')),
+        'font' => Arr::get($settings, 'font', Arr::get($default, 'font')),
+        'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
+       ];
+
+    }
 
     public function getStyles ($settings, $default) 
     {
-        $color = Arr::get($default, 'font_color');
-        $accent = Arr::get($default, 'accent_color');
-        $font = Arr::get($settings, 'font', Arr::get($default, 'font'));
-        $fontSize = Arr::get($default, 'font_size');
+        extract($this->getPreferences($settings, $default));
 
         $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
             tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
@@ -76,7 +83,6 @@ class Template1 extends TemplateManager
 
     public function getHtmlTemplate ($data, $settings, $default) 
     {   
-        $header = Arr::get($settings, 'header');
         $inputs = Arr::get($data, 'user_inputs');
         $labels = Arr::get($data, 'labels');
         if ( Arr::get($settings, 'empty_fields') == 'no') {
@@ -84,9 +90,6 @@ class Template1 extends TemplateManager
         };
 
         $inputHtml = '<div class="ff-pdf-wrapper">';
-        if ( $header) {
-            $inputHtml .= '<h3 class="ff-pdf-header">'. $header .'</h3>';
-        };
 
         $inputHtml .= '<div class="ff-pdf-table"><table>';
         foreach ($inputs as $key => $value) {

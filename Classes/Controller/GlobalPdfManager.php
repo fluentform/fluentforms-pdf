@@ -267,6 +267,7 @@ class GlobalPdfManager
         );
     }
 
+
     protected function renderPdf($settings, $data, $default)
     {
         $template = $this->initAndGetTemplateName($settings, $default);
@@ -295,8 +296,19 @@ class GlobalPdfManager
         // For the right to left text like arabic or hebrew
         if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text')))== 'yes') {
             $mpdf->SetDirectionality('rtl');
+    
         }
+        $mpdf->setAutoTopMargin= 'stretch';
+        $mpdf->setAutoBottomMargin= 'stretch';
+
+        $mpdf->SetHTMLHeader(
+            wp_unslash(( Arr::get($settings, 'header')))
+        );
         
+        $mpdf->SetHTMLFooter(
+            wp_unslash( ( Arr::get($settings, 'footer') ))
+        );
+     
         $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
         $mpdf->WriteHTML(Arr::get($inputData, 'html'));
         $mpdf->Output(
