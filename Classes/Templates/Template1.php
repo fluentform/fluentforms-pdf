@@ -36,7 +36,15 @@ class Template1 extends TemplateManager
                 'label'         => 'Pdf header',
                 'tab'           => 'tab1',
                 'tips'          => 'This text will be added to the header section of pdf',
-                'placeholder'   => 'Your Pdf Header',
+                'placeholder'   => 'Your File Name',
+                'component'     => 'editor'
+            ],
+            [
+                'key'           => 'footer',
+                'label'         => 'Pdf Footer',
+                'tab'           => 'tab1',
+                'tips'          => 'This text will be added to the footer section of pdf',
+                'placeholder'   => 'Your Pdf Footer',
                 'component'     => 'editor'
             ],
             [
@@ -55,23 +63,14 @@ class Template1 extends TemplateManager
        )];
     }
 
-    public function getPreferences($settings, $default) {
-       return [ 
-        'color' => Arr::get($settings, 'font_color', Arr::get($default, 'font_color')),
-        'accent' => Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color')),
-        'font' => Arr::get($settings, 'font', Arr::get($default, 'font')),
-        'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
-       ];
-
-    }
-
     public function getStyles ($settings, $default) 
     {
-        extract($this->getPreferences($settings, $default));
+        // will @return $color, $accent, $font, $fontSize
+        extract(PdfOptions::getPreferences($settings, $default)); 
 
-        $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
-            tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
-            td{color:'.$color.'; font-size:'.$fontSize.' px!important; text-align: left; padding:10px;}
+        $styles = 'table { border-collapse:separate; border-spacing: 0 15px; width: 100%;}
+            tr{ border-radius:15px;}
+            td{color:'.$color.'; border: 1px solid '.$accent.'; border-radius:15px; font-size:'.$fontSize.' px!important; text-align: left; padding:20px;}
             .ff-pdf-header {text-align:center;}';
 
         if ( $font && !($font=='default')) {
@@ -93,15 +92,14 @@ class Template1 extends TemplateManager
 
         $inputHtml .= '<div class="ff-pdf-table"><table>';
         foreach ($inputs as $key => $value) {
-            $inputHtml .= '<tr>';
-            $inputHtml .= '<td width="20%">'.$labels[$key] .'</td>';
+            $inputHtml .= '<tr><td height="20px"><strong>'.$labels[$key] .':</strong>  ';
             if (strpos($key, 'image-upload')!== false) {
-                $inputHtml .= '<td width="20%"><img src="'.$value.'"/></td>';
+                $inputHtml .= '<img src="'.$value.'"/>';
             }else {
-                $inputHtml .= '<td width="20%">'.$value.'</td>';
+                $inputHtml .= $value;
             }
            
-            $inputHtml .= '</tr>';
+            $inputHtml .= '</td></tr>';
         };
         $inputHtml .= '</table></div></div>';
 

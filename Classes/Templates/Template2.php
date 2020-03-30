@@ -62,19 +62,11 @@ class Template2 extends TemplateManager
        )];
     }
 
-    public function getPreferences($settings, $default) {
-       return [ 
-        'color' => Arr::get($settings, 'font_color', Arr::get($default, 'font_color')),
-        'accent' => Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color')),
-        'font' => Arr::get($settings, 'font', Arr::get($default, 'font')),
-        'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
-       ];
-
-    }
 
     public function getStyles ($settings, $default) 
     {
-        extract($this->getPreferences($settings, $default));
+        // will @return $color, $accent, $font, $fontSize
+        extract(PdfOptions::getPreferences($settings, $default)); 
 
         $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
             tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
@@ -104,7 +96,7 @@ class Template2 extends TemplateManager
             $inputHtml .= '<tr>';
             $inputHtml .= '<td width="20%">'.$labels[$key] .'</td>';
             if (strpos($key, 'image-upload')!== false) {
-                $inputHtml .= '<td width="20%"><img src="'.$value.'"/></td>';
+                $inputHtml .= '<td width="20%"><img width="100" src="'.urlencode($value).'"/></td>';
             }else {
                 $inputHtml .= '<td width="20%">'.$value.'</td>';
             }

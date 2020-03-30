@@ -80,7 +80,7 @@ class GlobalPdfManager
                 ],
                 "template2" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template2",
-                    'name'  => 'Rubix' 
+                    'name'  => 'Tabular' 
                 ]
             ]
         );
@@ -230,7 +230,8 @@ class GlobalPdfManager
         return [
             'mode' => 'utf-8', 
             'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size')),
-            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation'))
+            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation')),
+            // 'debug' => true //uncomment this debug on development
         ];
     }
 
