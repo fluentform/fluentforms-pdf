@@ -96,6 +96,81 @@ class AvailableOptions
         ];
     }
 
+
+    public static function commonSettings() {
+        return [
+            [
+                'key'       => 'paper_size',
+                'label'     => 'Paper size',
+                'component' => 'dropdown',
+                'tab'       => 'tab2',
+                'tips'      => 'select a pdf paper size',
+                'options'   => self::getPaperSizes()
+            ],
+            [
+                'key'       => 'orientation',
+                'label'     => 'Orientation',
+                'tab'       => 'tab2',
+                'component' => 'dropdown',
+                'options'   => self::getOrientations()
+            ],
+            [
+                'key' => 'font',
+                'label' => 'Font family',
+                'component' => 'dropdown',
+                'tab'       => 'tab2',
+                'options'   => self::getFonts()
+            ],
+            [
+                'key' => 'font_color',
+                'label' => 'Font color',
+                'tab'   => 'tab2',
+                'tips'  => 'The font color will use in the PDF.',
+                'placeholder' => 'Your Feed Name',
+                'component' => 'color_picker'
+            ],
+            [
+                'key' => 'accent_color',
+                'label' => 'Accent color',
+                'tab'   => 'tab2',
+                'tips'  => 'The accent color is used for the page, section titles and the border.',
+                'placeholder' => 'Your Feed Name',
+                'component' => 'color_picker'
+            ],
+            [
+                'key' => 'entry_view',
+                'label' => 'Entry view',
+                'tab'   =>'tab2',
+                'component' => 'radio_choice',
+                'options'   => [
+                    'I' => 'View',
+                    'D' => 'Download'
+                ]
+            ],
+            [
+                'key' => 'empty_fields',
+                'label' => 'Show empty fields',
+                'tab'   =>'tab2',
+                'component' => 'radio_choice',
+                'options'   => [
+                    'yes' => 'Yes',
+                    'no' => 'No'
+                ]
+            ],
+            [
+                'key' => 'reverse_text',
+                'label' => 'Reverse text',
+                'tab'   =>'tab2',
+                'tips'   =>'Script like Arabic and Hebrew are written right to left.',
+                'component' => 'radio_choice',
+                'options'   => [
+                    'yes' => 'Yes',
+                    'no' => 'No'
+                ]
+            ]
+        ];
+    }
+
     public static function slugify($string)
     {
         return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $string), '-'));
