@@ -21,100 +21,56 @@ class Template1 extends TemplateManager
     
     public function getSettingsFields()
     {
-        return [
-            'fields' => [
-                [
-                    'key'           => 'filename',
-                    'label'         => 'File Name',
-                    'required'      => true,
-                    'tab'           => 'tab1',
-                    'placeholder'   => 'Your File Name',
-                    'component'     => 'value_text'
-                ],
-                [
-                    'key'           => 'header',
-                    'label'         => 'Pdf header',
-                    'tab'           => 'tab1',
-                    'tips'          => 'This text will be added to the header section of pdf',
-                    'placeholder'   => 'Your Pdf Header',
-                    'component'     => 'value_text'
-                ],
-                [
-                    'key'           => 'conditionals',
-                    'label'         => 'Conditional Logics',
-                    'tab'           => 'tab1',
-                    'tips'          => 'Allow Pdf conditions',
-                    'component'     => 'conditional_block'
-                ],
-                [
-                    'key'       => 'paper_size',
-                    'label'     => 'Paper size',
-                    'component' => 'dropdown',
-                    'tab'       => 'tab2',
-                    'tips'      => 'All available templates are shown here, select a default template',
-                    'options'   => PdfOptions::getPaperSizes()
-                ],
-                [
-                    'key'       => 'orientation',
-                    'label'     => 'Orientation',
-                    'tab'       => 'tab2',
-                    'component' => 'dropdown',
-                    'options'   => PdfOptions::getOrientations()
-               ],
-                [
-                    'key' => 'font',
-                    'label' => 'Font family',
-                    'component' => 'dropdown',
-                    'tab'       => 'tab2',
-                    'options'   => PdfOptions::getFonts()
-               ],
-                [
-                    'key' => 'entry_view',
-                    'label' => 'Entry view',
-                    'tab'   =>'tab2',
-                    'component' => 'radio_choice',
-                    'options'   => [
-                        'I' => 'View',
-                        'D' => 'Download'
-                    ]
-               ],
-               [
-                    'key' => 'empty_fields',
-                    'label' => 'Show empty fields',
-                    'tab'   =>'tab2',
-                    'component' => 'radio_choice',
-                    'options'   => [
-                        'yes' => 'Yes',
-                        'no' => 'No'
-                    ]
-                ],
-                [
-                    'key' => 'reverse_text',
-                    'label' => 'Reverse text',
-                    'tab'   =>'tab2',
-                    'tips'   =>'Script like Arabic and Hebrew are written right to left.',
-                    'component' => 'radio_choice',
-                    'options'   => [
-                        'yes' => 'Yes',
-                        'no' => 'No'
-                    ]
-               ]
-
-            ]
+        // Add any custom settings here, but the tab must be declare
+        $customSettings = [
+            [
+                'key'           => 'filename',
+                'label'         => 'File Name',
+                'required'      => true,
+                'tab'           => 'tab1',
+                'placeholder'   => 'Your File Name',
+                'component'     => 'value_text'
+            ],
+            [
+                'key'           => 'header',
+                'label'         => 'Pdf header',
+                'tab'           => 'tab1',
+                'tips'          => 'This text will be added to the header section of pdf',
+                'placeholder'   => 'Your File Name',
+                'component'     => 'editor'
+            ],
+            [
+                'key'           => 'footer',
+                'label'         => 'Pdf Footer',
+                'tab'           => 'tab1',
+                'tips'          => 'This text will be added to the footer section of pdf',
+                'placeholder'   => 'Your Pdf Footer',
+                'component'     => 'editor'
+            ],
+            [
+                'key'           => 'conditionals',
+                'label'         => 'Conditional Logics',
+                'tab'           => 'tab1',
+                'tips'          => 'Allow Pdf conditions',
+                'component'     => 'conditional_block'
+            ],
         ];
-    }
 
+
+        return [ 'fields' => array_merge( 
+            $customSettings,
+            PdfOptions::commonSettings()
+       )];
+    }
 
     public function getStyles ($settings, $default) 
     {
-        $color = Arr::get($default, 'font_color');
-        $accent = Arr::get($default, 'accent_color');
-        $font = Arr::get($settings, 'font', Arr::get($default, 'font'));
-        $fontSize = Arr::get($default, 'font_size');
+        // will @return $color, $accent, $font, $fontSize
+        extract(PdfOptions::getPreferences($settings, $default)); 
 
-        $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
-            tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
-            td{color:'.$color.'; font-size:'.$fontSize.' px!important; text-align: left; padding:10px;}
+        $styles = 'table { border-collapse:separate; border-spacing: 0 15px; width: 100%;}
+            tr{ border-radius:15px;}
+            td{color:'.$color.'; border: 1px solid '.$accent.'; border-radius:15px; font-size:'.$fontSize.' px!important; text-align: left; padding:20px;}
             .ff-pdf-header {text-align:center;}';
 
         if ( $font && !($font=='default')) {
@@ -126,7 +82,6 @@ class Template1 extends TemplateManager
 
     public function getHtmlTemplate ($data, $settings, $default) 
     {   
-        $header = Arr::get($settings, 'header');
         $inputs = Arr::get($data, 'user_inputs');
         $labels = Arr::get($data, 'labels');
         if ( Arr::get($settings, 'empty_fields') == 'no') {
@@ -134,21 +89,17 @@ class Template1 extends TemplateManager
         };
 
         $inputHtml = '<div class="ff-pdf-wrapper">';
-        if ( $header) {
-            $inputHtml .= '<h3 class="ff-pdf-header">'. $header .'</h3>';
-        };
 
         $inputHtml .= '<div class="ff-pdf-table"><table>';
         foreach ($inputs as $key => $value) {
-            $inputHtml .= '<tr>';
-            $inputHtml .= '<td width="20%">'.$labels[$key] .'</td>';
+            $inputHtml .= '<tr><td height="20px"><strong>'.$labels[$key] .':</strong>  ';
             if (strpos($key, 'image-upload')!== false) {
-                $inputHtml .= '<td width="20%"><img src="'.$value.'"/></td>';
+                $inputHtml .= '<img src="'.$value.'"/>';
             }else {
-                $inputHtml .= '<td width="20%">'.$value.'</td>';
+                $inputHtml .= $value;
             }
            
-            $inputHtml .= '</tr>';
+            $inputHtml .= '</td></tr>';
         };
         $inputHtml .= '</table></div></div>';
 

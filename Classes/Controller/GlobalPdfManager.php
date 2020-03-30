@@ -80,7 +80,7 @@ class GlobalPdfManager
                 ],
                 "template2" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template2",
-                    'name'  => 'Rubix' 
+                    'name'  => 'Tabular' 
                 ]
             ]
         );
@@ -230,7 +230,8 @@ class GlobalPdfManager
         return [
             'mode' => 'utf-8', 
             'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size')),
-            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation'))
+            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation')),
+            // 'debug' => true //uncomment this debug on development
         ];
     }
 
@@ -267,6 +268,7 @@ class GlobalPdfManager
         );
     }
 
+
     protected function renderPdf($settings, $data, $default)
     {
         $template = $this->initAndGetTemplateName($settings, $default);
@@ -295,8 +297,19 @@ class GlobalPdfManager
         // For the right to left text like arabic or hebrew
         if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text')))== 'yes') {
             $mpdf->SetDirectionality('rtl');
+    
         }
+        $mpdf->setAutoTopMargin= 'stretch';
+        $mpdf->setAutoBottomMargin= 'stretch';
+
+        $mpdf->SetHTMLHeader(
+            wp_unslash(( Arr::get($settings, 'header')))
+        );
         
+        $mpdf->SetHTMLFooter(
+            wp_unslash( ( Arr::get($settings, 'footer') ))
+        );
+     
         $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
         $mpdf->WriteHTML(Arr::get($inputData, 'html'));
         $mpdf->Output(
