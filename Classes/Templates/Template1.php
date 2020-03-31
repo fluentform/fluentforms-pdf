@@ -47,13 +47,13 @@ class Template1 extends TemplateManager
                 'placeholder'   => 'Your Pdf Footer',
                 'component'     => 'editor'
             ],
-            [
-                'key'           => 'conditionals',
-                'label'         => 'Conditional Logics',
-                'tab'           => 'tab1',
-                'tips'          => 'Allow Pdf conditions',
-                'component'     => 'conditional_block'
-            ],
+            // [
+            //     'key'           => 'conditionals',
+            //     'label'         => 'Conditional Logics',
+            //     'tab'           => 'tab1',
+            //     'tips'          => 'Allow Pdf conditions',
+            //     'component'     => 'conditional_block'
+            // ],
         ];
 
 
