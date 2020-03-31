@@ -19,7 +19,7 @@ class Template1 extends TemplateManager
         $this->registerAdminHooks();
     }
     
-    public function getSettingsFields()
+    public function getSettingsFields($settings)
     {
         // Add any custom settings here, but the tab must be declare
         $customSettings = [
@@ -56,17 +56,15 @@ class Template1 extends TemplateManager
             // ],
         ];
 
-
-        return [ 'fields' => array_merge( 
-            $customSettings,
-            PdfOptions::commonSettings()
-       )];
+        return [
+            'fields' => array_merge($customSettings, $settings)
+        ];
     }
 
-    public function getStyles ($settings, $default) 
+    public function getStyles($preferences, $settings, $default) 
     {
-        // will @return $color, $accent, $font, $fontSize
-        extract(PdfOptions::getPreferences($settings, $default)); 
+        // $color, $accent, $font, $fontSize
+        extract($preferences);
 
         $styles = 'table { border-collapse:separate; border-spacing: 0 15px; width: 100%;}
             tr{ border-radius:15px;}
@@ -80,32 +78,22 @@ class Template1 extends TemplateManager
             
     }
 
-    public function getHtmlTemplate ($data, $settings, $default) 
-    {   
-        $inputs = Arr::get($data, 'user_inputs');
-        $labels = Arr::get($data, 'labels');
-        if ( Arr::get($settings, 'empty_fields') == 'no') {
-            $inputs = array_filter($inputs);
-        };
-
+    public function getHtmlTemplate($templateData, $inputs, $settings, $default) 
+    {
         $inputHtml = '<div class="ff-pdf-wrapper">';
 
         $inputHtml .= '<div class="ff-pdf-table"><table>';
-        foreach ($inputs as $key => $value) {
-            $inputHtml .= '<tr><td height="20px"><strong>'.$labels[$key] .':</strong>  ';
-            if (strpos($key, 'image-upload')!== false) {
-                $inputHtml .= '<img src="'.$value.'"/>';
-            }else {
-                $inputHtml .= $value;
-            }
+
+        foreach ($templateData['data'] as $key => $value) {
+            $inputHtml .= '<tr><td height="20px"><strong>'.$templateData['labels'][$key] .':</strong>  ';
+            
+            $inputHtml .= $value;
            
             $inputHtml .= '</td></tr>';
         };
+
         $inputHtml .= '</table></div></div>';
 
-        return [
-            'html' => wp_unslash($inputHtml),
-            'styles' => $this->getStyles($settings, $default)
-        ];
+        return wp_unslash($inputHtml);
     }
 }

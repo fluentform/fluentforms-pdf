@@ -18,7 +18,7 @@ class Template2 extends TemplateManager
         $this->registerAdminHooks();
     }
 
-    public function getSettingsFields()
+    public function getSettingsFields($settings)
     {
         $customSettings =  [
             [
@@ -55,59 +55,44 @@ class Template2 extends TemplateManager
 
         ];
 
-
-       return [ 'fields' => array_merge( 
-            $customSettings,
-            PdfOptions::commonSettings()
-       )];
+       return [
+            'fields' => array_merge($customSettings, $settings)
+        ];
     }
 
 
-    public function getStyles ($settings, $default) 
+    public function getStyles($preferences, $settings, $default) 
     {
-        // will @return $color, $accent, $font, $fontSize
-        extract(PdfOptions::getPreferences($settings, $default)); 
+        // $color, $accent, $font, $fontSize
+        extract($preferences);
 
         $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
             tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
             td{color:'.$color.'; font-size:'.$fontSize.'px!important; text-align: left; padding:10px;}
             .ff-pdf-header {text-align:center;}';
 
-        if ( $font && !($font=='default')) {
+        if ($font && !($font == 'default')) {
             $styles .= '.ff-pdf-table tr td, .ff-pdf-header {font-family:'.$font.'}';
         }
+
         return $styles;
-            
     }
 
-    public function getHtmlTemplate ($data, $settings, $default) 
+    public function getHtmlTemplate($templateData, $inputs, $settings, $default) 
     {
-        $inputs = Arr::get($data, 'user_inputs');
-        $labels = Arr::get($data, 'labels');
-
-        if ( Arr::get($settings, 'empty_fields') == 'no') {
-            $inputs = array_filter($inputs);
-        };
-
         $inputHtml = '<div class="ff-pdf-wrapper">';
 
         $inputHtml .= '<div class="ff-pdf-table"><table>';
-        foreach ($inputs as $key => $value) {
+
+        foreach ($templateData['data'] as $key => $value) {
             $inputHtml .= '<tr>';
-            $inputHtml .= '<td width="20%">'.$labels[$key] .'</td>';
-            if (strpos($key, 'image-upload')!== false) {
-                $inputHtml .= '<td width="20%"><img width="100" src="'.urlencode($value).'"/></td>';
-            }else {
-                $inputHtml .= '<td width="20%">'.$value.'</td>';
-            }
-           
+            $inputHtml .= '<td width="20%">'.$templateData['labels'][$key] .'</td>';
+            $inputHtml .= '<td width="20%">'.$value.'</td>';
             $inputHtml .= '</tr>';
         };
+        
         $inputHtml .= '</table></div></div>';
-;
-        return [
-            'html'  => wp_unslash($inputHtml),
-            'styles'=> $this->getStyles($settings, $default)
-        ];
+
+        return wp_unslash($inputHtml);
     }
 }

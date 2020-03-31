@@ -5,7 +5,6 @@ use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 
 class AvailableOptions
 {
-   
     public static function getPaperSizes() 
     {
         return [
@@ -182,24 +181,17 @@ class AvailableOptions
         return strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $string), '-'));
     }
 
-    public static function getPreferences($settings, $default) {
-        $accent = Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color'));
+    public static function getPreferences($settings, $default)
+    {
         $color = Arr::get($settings, 'font_color', Arr::get($default, 'font_color'));
 
-        if ($accent == '') {
-            $accent = Arr::get($default, 'accent_color');
-        }
-         if ($color == '') {
-            $color = Arr::get($default, 'font_color');
-        }
-       return [ 
-        'color' =>  $color,
-        'accent' => $accent,
-        'font' => Arr::get($settings, 'font', Arr::get($default, 'font')),
-        'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
-       ];
+        $accent = Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color'));
 
+        return [ 
+            'color' =>  $color,
+            'accent' => $accent,
+            'font' => Arr::get($settings, 'font', Arr::get($default, 'font')),
+            'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
+        ];
     }
-
-
 }
