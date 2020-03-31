@@ -20,20 +20,27 @@ abstract class TemplateManager
             'fluentform_get_pdf_settings_fields_' . $this->templateKey,
             [$this, 'getSettingsFields'],
             10,
-            2
+            1
         );
 
         add_filter(
-            'fluentform_get_pdf_html_template_' . $this->templateKey,
+            'fluentform_get_pdf_html_' . $this->templateKey,
             [$this, 'getHtmlTemplate'],
+            10,
+            4
+        );
+
+        add_filter(
+            'fluentform_get_pdf_style_' . $this->templateKey,
+            [$this, 'getStyles'],
             10,
             3
         );
     }
     
-    abstract public function getSettingsFields();
+    abstract public function getSettingsFields($settings);
 
-    abstract public function getStyles($settings, $default);
+    abstract public function getStyles($preferences, $settings, $default);
 
-    abstract public function getHtmlTemplate($data, $settings, $default);
+    abstract public function getHtmlTemplate($templateData, $inputs, $settings, $default);
 }

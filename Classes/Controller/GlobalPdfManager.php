@@ -3,6 +3,7 @@
 namespace FluentFormPdf\Classes\Controller;
 
 use Mpdf\Mpdf as Pdf;
+use FluentForm\App\Modules\Entries\Entries;
 use FluentForm\Framework\Foundation\Application;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
@@ -218,6 +219,8 @@ class GlobalPdfManager
     */
     public function getFormTemplateSettings()
     {
+        $commonSettings = PdfOptions::commonSettings();
+
         $templateKey = $_REQUEST['templateKey'];
 
         $allTemplates =  $this->getAvailableTemplates();
@@ -227,7 +230,7 @@ class GlobalPdfManager
         };
 
         $settingsFields = apply_filters(
-            'fluentform_get_pdf_settings_fields_' . $templateKey, [], $templateKey
+            'fluentform_get_pdf_settings_fields_' . $templateKey, $commonSettings
         );
         
         wp_send_json_success($settingsFields);
@@ -251,22 +254,24 @@ class GlobalPdfManager
     public function pdfDownload() 
     {
         $data = Arr::get($_REQUEST, 'entry');
+
         $data['labels'] = Arr::get($_REQUEST, 'labels');
 
         $settings = Arr::get($_REQUEST, 'settings');
 
-        if (!$data || !$settings) {
+        if (!isset($data, $settings)) {
             return;
         }
 
         $default = get_option('_fluentform_global_pdf_settings');
+
+        $defaultPdfOptions = PdfOptions::getDefaultSettings();
+
         if (!$default) {
-            $default = PdfOptions::getDefaultSettings();
+            $default = $defaultPdfOptions;
         } else {
-            foreach($default as $key => $value) {
-                if($value == '') {
-                    $default[$key] = PdfOptions::getDefaultSettings()[$key];
-                }
+            foreach ($default as $key => $value) {
+                $default[$key] = $value ?: $defaultPdfOptions[$key];
             }
         }
 
@@ -284,47 +289,48 @@ class GlobalPdfManager
 
         $settings = ShortCodeParser::parse(
             $settings, 
-            Arr::get($data,'id'), 
-            Arr::get($data,'user_inputs'), 
+            Arr::get($data, 'id'), 
+            Arr::get($data, 'user_inputs'), 
         );
 
-        $inputData = apply_filters(
-            "fluentform_get_pdf_html_template_{$template}", $data, $settings, $default
+        $templateData = $this->getTemplateData($data, $settings, $default);
+
+        $html = apply_filters(
+            "fluentform_get_pdf_html_{$template}", $templateData, $data, $settings, $default
+        );
+
+        $preferences = PdfOptions::getPreferences($settings, $default);
+
+        $style = apply_filters(
+            "fluentform_get_pdf_style_{$template}", $preferences, $settings, $default
         );
 
         $entryView = Arr::get($settings, 'entry_view', Arr::get($default, 'entry_view'));
-    
-        $mpdf = new Pdf(
-            $this->getPdfConfig($settings, $default)
-        );
 
         $filename = Arr::get($settings, 'filename');
-        if ( $filename == '') {
-            $filename = Arr::get($default, 'filename');
-        }
-        
-        // For the right to left text like arabic or hebrew
-        if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text')))== 'yes') {
-            $mpdf->SetDirectionality('rtl');
-    
-        }
-        $mpdf->setAutoTopMargin= 'stretch';
-        $mpdf->setAutoBottomMargin= 'stretch';
+
+        $filename = $filename ?: Arr::get($default, 'filename');
+
+        $mpdf = new Pdf($this->getPdfConfig($settings, $default));
+
+        $mpdf->setAutoBottomMargin = $mpdf->setAutoTopMargin = 'stretch';
 
         $mpdf->SetHTMLHeader(
-            wp_unslash(( Arr::get($settings, 'header')))
+            wp_unslash((Arr::get($settings, 'header')))
         );
         
         $mpdf->SetHTMLFooter(
-            wp_unslash( ( Arr::get($settings, 'footer') ))
+            wp_unslash((Arr::get($settings, 'footer')))
         );
+
+        // For the right to left text like arabic or hebrew
+        if ((Arr::get($settings, 'reverse_text', Arr::get($default, 'reverse_text'))) == 'yes') {
+            $mpdf->SetDirectionality('rtl');
+        }
      
-        $mpdf->WriteHTML(Arr::get($inputData, 'styles'),1);
-        $mpdf->WriteHTML(Arr::get($inputData, 'html'));
-        $mpdf->Output(
-            PdfOptions::slugify($filename), 
-            $entryView
-        );
+        $mpdf->WriteHTML($style, 1);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output(PdfOptions::slugify($filename), $entryView);
     }
 
     protected function initAndGetTemplateName($settings, $default)
@@ -336,5 +342,25 @@ class GlobalPdfManager
         new $templateClass($this->app);
 
         return $template;
+    }
+
+    protected function getTemplateData($data, $settings, $default)
+    {
+        $entry = (new Entries)->_getEntry();
+
+        $entry = reset($entry);
+
+        $entry = $entry->user_inputs;
+
+        $labels = Arr::get($data, 'labels');
+
+        if (Arr::get($settings, 'empty_fields') == 'no') {
+            $entry = array_filter($entry);
+        };
+
+        return [
+            'data' => $entry,
+            'labels' => $labels
+        ];
     }
 }
