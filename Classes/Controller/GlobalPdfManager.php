@@ -134,7 +134,7 @@ class GlobalPdfManager
                     'key'       => 'template',
                     'label'     => 'Template',
                     'component' => 'dropdown',
-                    'options'   => $this->formattedTemplates()
+                    'options'   => (Arr::get($this->formattedTemplates(), 'formatted'))
                ],
                 [
                     'key'       => 'orientation',
