@@ -75,12 +75,17 @@ class GlobalPdfManager
             'fluentform_pdf_template_map',
             [
                 "template1" => [
-                    'path' => "\FluentFormPdf\Classes\Templates\Template1",
-                    'name'  => 'Blank'
+                    'path'  => "\FluentFormPdf\Classes\Templates\Template1",
+                    'name'  => 'Blank',
+                    'key'   => 'template1',
+                    'image' => plugin_dir_url( __FILE__ ) .('../../Images/Template1.png')
+                    
                 ],
                 "template2" => [
                     'path' => "\FluentFormPdf\Classes\Templates\Template2",
-                    'name'  => 'Tabular' 
+                    'name'  => 'Tabular',
+                    'key'   => 'template2',
+                    'image' => plugin_dir_url( __FILE__ ) .('../../Images/Template2.png')
                 ]
             ]
         );
@@ -102,8 +107,12 @@ class GlobalPdfManager
             $allTemplates[$key] = $value['name'];      
         };
 
-        return $allTemplates;
+        return [
+            'formatted' => $allTemplates,
+            'all'       => $this->getAvailableTemplates()
+        ];
     }
+
 
 
     /*
@@ -125,7 +134,7 @@ class GlobalPdfManager
                     'key'       => 'template',
                     'label'     => 'Template',
                     'component' => 'dropdown',
-                    'options'   => $this->formattedTemplates()
+                    'options'   => (Arr::get($this->formattedTemplates(), 'formatted'))
                ],
                 [
                     'key'       => 'orientation',
