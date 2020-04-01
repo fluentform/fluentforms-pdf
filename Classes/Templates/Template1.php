@@ -35,7 +35,7 @@ class Template1 extends TemplateManager
                 'key'           => 'header',
                 'label'         => 'Pdf header',
                 'tab'           => 'tab1',
-                'tips'          => 'This text will be added to the header section of pdf',
+                'tips'          => 'This text will be added to the header section of every single page',
                 'placeholder'   => 'Your File Name',
                 'component'     => 'editor'
             ],
@@ -43,7 +43,7 @@ class Template1 extends TemplateManager
                 'key'           => 'footer',
                 'label'         => 'Pdf Footer',
                 'tab'           => 'tab1',
-                'tips'          => 'This text will be added to the footer section of pdf',
+                'tips'          => 'This text will be added to the footer section of every single page',
                 'placeholder'   => 'Your Pdf Footer',
                 'component'     => 'editor'
             ],
@@ -63,8 +63,10 @@ class Template1 extends TemplateManager
 
     public function getStyles($preferences, $settings, $default) 
     {
-        // $color, $accent, $font, $fontSize
-        extract($preferences);
+        $color = Arr::get($preferences,'color');
+        $accent = Arr::get($preferences,'accent_color');
+        $font = Arr::get($preferences,'font');
+        $fontSize = Arr::get($preferences,'font_size');
 
         $styles = 'table { border-collapse:separate; border-spacing: 0 15px; width: 100%;}
             tr{ border-radius:15px;}

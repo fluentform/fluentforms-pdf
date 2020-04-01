@@ -63,8 +63,10 @@ class Template2 extends TemplateManager
 
     public function getStyles($preferences, $settings, $default) 
     {
-        // $color, $accent, $font, $fontSize
-        extract($preferences);
+        $color = Arr::get($preferences,'color');
+        $accent = Arr::get($preferences,'accent_color');
+        $font = Arr::get($preferences,'font');
+        $fontSize = Arr::get($preferences,'font_size');
 
         $styles = 'table {width: 100%; border-radius:10px; border:1px solid '.$accent.'}
             tr:nth-child(even){background-color: #dddddd} tr:nth-child(odd){background-color: #F8F8F8}
