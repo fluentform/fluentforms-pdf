@@ -183,9 +183,14 @@ class AvailableOptions
 
     public static function getPreferences($settings, $default)
     {
-        $color = Arr::get($settings, 'font_color', Arr::get($default, 'font_color'));
-
-        $accent = Arr::get($settings, 'accent_color', Arr::get($default, 'accent_color'));
+        $color = Arr::get($settings, 'font_color');
+        $accent = Arr::get($settings, 'accent_color');
+        if ($color == '' || null) {
+            $color = Arr::get($default, 'font_color');
+        }
+        if ($accent == '' || null) {
+            $accent = Arr::get($default, 'accent_color');
+        }
 
         return [ 
             'color' =>  $color,

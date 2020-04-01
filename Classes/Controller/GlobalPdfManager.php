@@ -238,7 +238,7 @@ class GlobalPdfManager
 
     
     public function getPdfConfig($settings, $default)
-    {   
+    {  
         return [
             'mode' => 'utf-8', 
             'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size')),
@@ -253,8 +253,9 @@ class GlobalPdfManager
     */
     public function pdfDownload() 
     {
-        $data = Arr::get($_REQUEST, 'entry');
 
+        $data['entry_id'] = Arr::get($_REQUEST, 'entry_id');
+        $data['form_id'] = Arr::get($_REQUEST, 'form_id');
         $data['labels'] = Arr::get($_REQUEST, 'labels');
 
         $settings = Arr::get($_REQUEST, 'settings');
@@ -287,13 +288,13 @@ class GlobalPdfManager
     {
         $template = $this->initAndGetTemplateName($settings, $default);
 
+        $templateData = $this->getTemplateData($data, $settings, $default);
+
         $settings = ShortCodeParser::parse(
             $settings, 
-            Arr::get($data, 'id'), 
-            Arr::get($data, 'user_inputs'), 
+            Arr::get($data, 'entry_id'), 
+            Arr::get($templateData, 'data'), 
         );
-
-        $templateData = $this->getTemplateData($data, $settings, $default);
 
         $html = apply_filters(
             "fluentform_get_pdf_html_{$template}", $templateData, $data, $settings, $default
