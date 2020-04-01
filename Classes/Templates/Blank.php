@@ -64,9 +64,9 @@ class Blank extends TemplateManager
     public function getStyles($preferences, $settings, $default) 
     {
         $color = Arr::get($preferences,'color');
-        $accent = Arr::get($preferences,'accent_color');
+        $accent = Arr::get($preferences,'accent');
         $font = Arr::get($preferences,'font');
-        $fontSize = Arr::get($preferences,'font_size');
+        $fontSize = Arr::get($preferences,'fontSize');
 
         $styles = 'table { border-collapse:separate; border-spacing: 0 15px; width: 100%;}
             tr{ border-radius:15px;}
