@@ -7,9 +7,9 @@ use FluentFormPdf\Classes\Templates\TemplateManager;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
-class Template2 extends TemplateManager
+class Tabular extends TemplateManager
 {
-    protected $templateKey = 'template2';
+    protected $templateKey = 'tabular';
 
     public function __construct(Application $app)
     {

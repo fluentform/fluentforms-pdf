@@ -84,7 +84,7 @@ class AvailableOptions
         return [
             'font_size'     => '16',
             "paper_size"    => 'A4',
-            'template'      => 'template1',
+            'template'      => 'blank',
             'orientation'   => 'P',
             'font'          => 'default',
             'font_color'    => '#000000',

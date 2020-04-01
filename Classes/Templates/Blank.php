@@ -8,9 +8,9 @@ use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 
-class Template1 extends TemplateManager
+class Blank extends TemplateManager
 {
-    protected $templateKey = 'template1';
+    protected $templateKey = 'blank';
 
     public function __construct(Application $app)
     {

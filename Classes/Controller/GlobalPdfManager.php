@@ -75,18 +75,18 @@ class GlobalPdfManager
         $classes = apply_filters(
             'fluentform_pdf_template_map',
             [
-                "template1" => [
-                    'path'  => "\FluentFormPdf\Classes\Templates\Template1",
+                "blank" => [
+                    'path'  => "\FluentFormPdf\Classes\Templates\Blank",
                     'name'  => 'Blank',
-                    'key'   => 'template1',
-                    'image' => plugin_dir_url( __FILE__ ) .('../../Images/Template1.png')
+                    'key'   => 'blank',
+                    'image' => plugin_dir_url( __FILE__ ) .('../../Images/Blank.png')
                     
                 ],
-                "template2" => [
-                    'path' => "\FluentFormPdf\Classes\Templates\Template2",
+                "tabular" => [
+                    'path' => "\FluentFormPdf\Classes\Templates\Tabular",
                     'name'  => 'Tabular',
-                    'key'   => 'template2',
-                    'image' => plugin_dir_url( __FILE__ ) .('../../Images/Template2.png')
+                    'key'   => 'tabular',
+                    'image' => plugin_dir_url( __FILE__ ) .('../../Images/Tabular.png')
                 ]
             ]
         );
