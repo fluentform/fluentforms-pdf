@@ -131,7 +131,6 @@ class AvailableOptions
                 'label'     => 'Font color',
                 'tab'       => 'tab2',
                 'tips'      => 'The font color will use in the PDF.',
-                'placeholder'=> 'Your Feed Name',
                 'component' => 'color_picker'
             ],
             [
@@ -139,7 +138,6 @@ class AvailableOptions
                 'label'     => 'Accent color',
                 'tab'       => 'tab2',
                 'tips'      => 'The accent color is used for the page, section titles and the border.',
-                'placeholder'=> 'Your Feed Name',
                 'component' => 'color_picker'
             ],
             [
@@ -193,9 +191,9 @@ class AvailableOptions
         }
 
         return [ 
-            'color' =>  $color,
-            'accent' => $accent,
-            'font' => Arr::get($settings, 'font', Arr::get($default, 'font')),
+            'color'    =>  $color,
+            'accent'   => $accent,
+            'font'     => Arr::get($settings, 'font', Arr::get($default, 'font')),
             'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
         ];
     }

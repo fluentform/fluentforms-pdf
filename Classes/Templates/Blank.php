@@ -36,7 +36,7 @@ class Blank extends TemplateManager
                 'label'         => 'Pdf header',
                 'tab'           => 'tab1',
                 'tips'          => 'This text will be added to the header section of every single page',
-                'placeholder'   => 'Your File Name',
+                'placeholder'   => 'Your PDF Header',
                 'component'     => 'editor'
             ],
             [
@@ -44,7 +44,7 @@ class Blank extends TemplateManager
                 'label'         => 'Pdf Footer',
                 'tab'           => 'tab1',
                 'tips'          => 'This text will be added to the footer section of every single page',
-                'placeholder'   => 'Your Pdf Footer',
+                'placeholder'   => 'Your PDF Footer',
                 'component'     => 'editor'
             ],
             // [

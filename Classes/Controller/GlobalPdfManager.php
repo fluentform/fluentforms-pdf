@@ -160,14 +160,14 @@ class GlobalPdfManager
                     'component' => 'color_picker'
                ],
                 [
-                    'key' => 'accent_color',
-                    'label' => 'Accent color',
-                    'tips'  => 'The accent color is used for the page, section titles and the border.',
+                    'key'       => 'accent_color',
+                    'label'     => 'Accent color',
+                    'tips'      => 'The accent color is used for the page, section titles and the border.',
                     'component' => 'color_picker'
                ],
                [
-                    'key'   => 'entry_view',
-                    'label' => 'Entry view',
+                    'key'       => 'entry_view',
+                    'label'     => 'Entry view',
                     'component' => 'radio_choice',
                     'options'   => [
                         'I' => 'View',
@@ -175,9 +175,9 @@ class GlobalPdfManager
                     ]
                 ],
                 [
-                    'key' => 'reverse_text',
-                    'label' => 'Reverse text',
-                    'tips'   =>'Script like Arabic and Hebrew are written right to left.',
+                    'key'       => 'reverse_text',
+                    'label'     => 'Reverse text',
+                    'tips'      =>'Script like Arabic and Hebrew are written right to left.',
                     'component' => 'radio_choice',
                     'options'   => [
                         'yes' => 'Yes',

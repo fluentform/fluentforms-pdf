@@ -34,7 +34,7 @@ class Tabular extends TemplateManager
                 'label'         => 'Pdf header',
                 'tab'           => 'tab1',
                 'tips'          => 'This text will be added to the header section of pdf',
-                'placeholder'   => 'Your File Name',
+                'placeholder'   => 'Your PDF Header',
                 'component'     => 'editor'
             ],
             [
@@ -42,7 +42,7 @@ class Tabular extends TemplateManager
                 'label'         => 'Pdf Footer',
                 'tab'           => 'tab1',
                 'tips'          => 'This text will be added to the footer section of pdf',
-                'placeholder'   => 'Your Pdf Footer',
+                'placeholder'   => 'Your PDF Footer',
                 'component'     => 'editor'
             ],
             // [
