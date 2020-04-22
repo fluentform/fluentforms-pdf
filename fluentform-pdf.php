@@ -31,6 +31,7 @@
 defined('ABSPATH') or die;
 define('FLUENTFORM_PDF_VERSION', '1.0.0');
 define('FLUENTFORM_PDF_PATH', plugin_dir_path(__FILE__));
+define('FLUENTFORM_PDF_URL', plugin_dir_url(__FILE__));
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -76,7 +77,7 @@ class FluentFormPdf
                 $install_url_text = 'Click Here to Activate the Plugin';
             }
 
-            $message = 'FluentForm pdf Add-On Requires Fluent Forms Add On Plugin, ';
+            $message = 'FluentForm pdf Add-On Requires Fluent Forms Plugin, ';
             $message .= '<b><a href="' .$pluginInfo->url . '">' . $install_url_text . '</a></b>';
 
             printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), $message);
@@ -92,15 +93,15 @@ class FluentFormPdf
 
         $allPlugins = get_plugins();
 
-        if (isset($allPlugins['fluentformpro/fluentformpro.php'])) {
+        if (isset($allPlugins['fluentform/fluentform.php'])) {
             $url = wp_nonce_url(
-                self_admin_url('plugins.php?action=activate&plugin=fluentformpro/fluentformpro.php'),
-                'activate-plugin_fluentformpro/fluentformpro.php'
+                self_admin_url('plugins.php?action=activate&plugin=fluentform/fluentform.php'),
+                'activate-plugin_fluentform/fluentform.php'
             );
 
             $activation->action = 'activate';
         } else {
-            $api = (object) ['slug' => 'fluentformpro'];
+            $api = (object) ['slug' => 'fluentform'];
 
             $url = wp_nonce_url(
                 self_admin_url('update.php?action=install-plugin&plugin=' . $api->slug),

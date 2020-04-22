@@ -95,7 +95,6 @@ class AvailableOptions
         ];
     }
 
-
     public static function commonSettings() {
         return [
             [
