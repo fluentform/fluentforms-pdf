@@ -108,6 +108,7 @@ class GlobalPdfManager
             'font_size' => '14',
             'font_color' => '#323232',
             'accent_color' => '#989797',
+            'heading_color' => '#000000',
             'entry_view' => 'download',
             'reverse_text' => 'no'
         ];
@@ -348,12 +349,6 @@ class GlobalPdfManager
                 'options' => PdfOptions::getOrientations()
             ],
             [
-                'key' => 'font',
-                'label' => 'Font family',
-                'component' => 'dropdown',
-                'options' => PdfOptions::getFonts()
-            ],
-            [
                 'key' => 'font_size',
                 'label' => 'Font size',
                 'component' => 'number'
@@ -364,9 +359,15 @@ class GlobalPdfManager
                 'component' => 'color_picker'
             ],
             [
+                'key' => 'heading_color',
+                'label' => 'Heading color',
+                'tips' => 'The Color Form Headings',
+                'component' => 'color_picker'
+            ],
+            [
                 'key' => 'accent_color',
                 'label' => 'Accent color',
-                'tips' => 'The accent color is used for the page, section titles and the border.',
+                'tips' => 'The accent color is used for the borders, breaks etc.',
                 'component' => 'color_picker'
             ],
             [
@@ -406,7 +407,7 @@ class GlobalPdfManager
 
         $contents = '<ul class="ff_list_items">';
         foreach ($feeds as $feed) {
-            $contents .= '<li><a href="'.admin_url('admin-ajax.php?action=fluentform_pdf_admin_ajax_actions&route=download_pdf&id='.$feed['id']).'" target="_blank"><span style="font-size: 12px;" class="dashicons dashicons-arrow-down-alt"></span>'.$feed['name'].'</a></li>';
+            $contents .= '<li><a href="'.admin_url('admin-ajax.php?action=fluentform_pdf_admin_ajax_actions&route=download_pdf&submission_id='.$data['submission']->id.'&id='.$feed['id']).'" target="_blank"><span style="font-size: 12px;" class="dashicons dashicons-arrow-down-alt"></span>'.$feed['name'].'</a></li>';
         }
         $contents .= '</ul>';
         $widgetData['content'] = $contents;
@@ -436,6 +437,7 @@ class GlobalPdfManager
     public function downloadPdf()
     {
         $feedId = intval($_REQUEST['id']);
+        $submissionId = intval($_REQUEST['submission_id']);
         $feed = wpFluent()->table('fluentform_form_meta')
             ->where('id', $feedId)
             ->where('meta_key', '_pdf_feeds')
@@ -443,6 +445,30 @@ class GlobalPdfManager
 
         $settings = json_decode($feed->value, true);
 
-        vddd($settings);
+        $settings['id'] = $feed->id;
+
+        $form = wpFluent()->table('fluentform_forms')
+                    ->where('id', $feed->form_id)
+                    ->first();
+
+        $templateName = ArrayHelper::get($settings, 'template_key');
+
+        $templates = $this->getAvailableTemplates($feed);
+
+        if(!isset($templates[$templateName])) {
+            die('Sorry! No template found');
+        }
+
+        $template = $templates[$templateName];
+
+        $class = $template['class'];
+        if(!class_exists($class)) {
+            die('Sorry! No template class found');
+        }
+
+        $instance = new $class($this->app);
+
+        $instance->viewPDF($submissionId, $settings);
+
     }
 }

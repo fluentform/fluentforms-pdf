@@ -2,6 +2,8 @@
 
 namespace FluentFormPdf\Classes\Templates;
 
+use FluentForm\App\Services\Emogrifier\Emogrifier;
+use FluentForm\App\Services\FormBuilder\ShortCodeParser;
 use FluentForm\Framework\Foundation\Application;
 use FluentFormPdf\Classes\Templates\TemplateManager;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
@@ -48,5 +50,27 @@ class BasicTemplate extends TemplateManager
                 'component' => 'wp-editor'
             ]
         );
+    }
+
+    public function generatePdf($submissionId, $feed)
+    {
+        $settings = $feed['settings'];
+        $submission = wpFluent()->table('fluentform_submissions')
+                        ->where('id', $submissionId)
+                        ->first();
+        $formData = json_decode($submission->response, true);
+
+        $settings = ShortCodeParser::parse($settings, $submissionId, $formData);
+
+        $htmlBody = $settings['header'];
+        $htmlBody .= $settings['body'];
+
+        $htmlBody = str_replace('{page_break}', '<page_break />', $htmlBody);
+
+        $footer = $settings['footer'];
+
+        $fileName = $feed['name'];
+        $fileName = sanitize_title($fileName, 'pdf-file', 'display');
+        $this->pdfBuilder($fileName, $feed, $htmlBody, $footer);
     }
 }
