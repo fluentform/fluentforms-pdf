@@ -79,7 +79,7 @@ class GlobalPdfManager
             'get_feed' => 'getFeedAjax',
             'save_feed' => 'saveFeedAjax',
             'delete_feed' => 'deleteFeedAjax',
-            'download_pdf' => 'downloadPdf'
+            'download_pdf' => 'getPdf'
         ];
 
         $route = sanitize_text_field($_REQUEST['route']);
@@ -109,7 +109,6 @@ class GlobalPdfManager
             'font_color' => '#323232',
             'accent_color' => '#989797',
             'heading_color' => '#000000',
-            'entry_view' => 'download',
             'reverse_text' => 'no'
         ];
 
@@ -249,10 +248,32 @@ class GlobalPdfManager
         }
         $instance = new $class($this->app);
 
+        $globalFields = $this->getGlobalFields();
+
+        $globalFields['watermark_image'] = [
+            'key' => 'watermark_image',
+            'label' => 'Water Mark Image',
+            'component' => 'image_widget'
+        ];
+
+        $globalFields['watermark_text'] = [
+            'key' => 'watermark_text',
+            'label' => 'Water Mark Text',
+            'component' => 'text',
+            'placeholder' => 'Watermark text'
+        ];
+
+        $globalFields['watermark_opacity'] = [
+            'key' => 'watermark_opacity',
+            'label' => 'Water Mark Opacity',
+            'component' => 'number',
+            'inline_tip' => 'Value should be between 1 to 100'
+        ];
+
         wp_send_json_success([
             'feed' => $settings,
             'settings_fields' => $instance->getSettingsFields(),
-            'appearance_fields' => $this->getGlobalFields()
+            'appearance_fields' => $globalFields
         ], 200);
 
 
@@ -307,25 +328,25 @@ class GlobalPdfManager
     */
     public function getAvailableTemplates($form)
     {
-        return apply_filters(
-            'fluentform_pdf_templates',
-            array(
-                "basic_template" => [
-                    'name' => 'Basic Template',
-                    'class' => '\FluentFormPdf\Classes\Templates\BasicTemplate',
-                    'key' => 'basic_template',
-                    'preview' => FLUENTFORM_PDF_URL . 'assets/images/basic_template.png'
-                ],
-                "another_template" => [
-                    'name' => 'Another Template',
-                    'class' => '\FluentFormPdf\Classes\Templates\BasicTemplate',
-                    'key' => 'basic_template',
-                    'preview' => FLUENTFORM_PDF_URL . 'assets/images/tabular.png'
-                ]
-            ), $form
-        );
-    }
+        $templates =  [
+            "general" => [
+                'name' => 'General',
+                'class' => '\FluentFormPdf\Classes\Templates\GeneralTemplate',
+                'key' => 'general',
+                'preview' => FLUENTFORM_PDF_URL . 'assets/images/basic_template.png'
+            ]
+        ];
 
+        if($form->has_payment) {
+            $templates['invoice'] = [
+                'name' => 'Invoice',
+                'class' => '\FluentFormPdf\Classes\Templates\InvoiceTemplate',
+                'key' => 'invoice',
+                'preview' => FLUENTFORM_PDF_URL . 'assets/images/tabular.png'
+            ];
+        }
+        return  apply_filters( 'fluentform_pdf_templates',$templates, $form);
+    }
 
 
     /*
@@ -369,15 +390,6 @@ class GlobalPdfManager
                 'label' => 'Accent color',
                 'tips' => 'The accent color is used for the borders, breaks etc.',
                 'component' => 'color_picker'
-            ],
-            [
-                'key' => 'entry_view',
-                'label' => 'Entry view',
-                'component' => 'radio_choice',
-                'options' => [
-                    'view' => 'View',
-                    'download' => 'Download'
-                ]
             ],
             [
                 'key' => 'reverse_text',
@@ -434,7 +446,7 @@ class GlobalPdfManager
     * when download button will press
     * Pdf rendering will control from here
     */
-    public function downloadPdf()
+    public function getPdf()
     {
         $feedId = intval($_REQUEST['id']);
         $submissionId = intval($_REQUEST['submission_id']);
@@ -453,7 +465,7 @@ class GlobalPdfManager
 
         $templateName = ArrayHelper::get($settings, 'template_key');
 
-        $templates = $this->getAvailableTemplates($feed);
+        $templates = $this->getAvailableTemplates($form);
 
         if(!isset($templates[$templateName])) {
             die('Sorry! No template found');

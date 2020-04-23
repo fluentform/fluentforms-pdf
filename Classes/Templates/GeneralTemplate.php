@@ -10,10 +10,8 @@ use FluentForm\Framework\Helpers\ArrayHelper as Arr;
 use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 
-class BasicTemplate extends TemplateManager
+class GeneralTemplate extends TemplateManager
 {
-    protected $templateKey = 'blank';
-
     public function __construct(Application $app)
     {
         parent::__construct($app);
@@ -22,8 +20,8 @@ class BasicTemplate extends TemplateManager
     public function getDefaultSettings($form)
     {
         return [
-            'header' => '',
-            'footer' => '',
+            'header' => '<h2>PDF Title</h2>',
+            'footer' => '<table width="100%"><tr><td width="50%">{DATE j-m-Y}</td><td width="50%"  style="text-align: right;" align="right">{PAGENO}/{nbpg}</td></tr></table>',
             'body' => '{all_data}'
         ];
     }
@@ -65,11 +63,9 @@ class BasicTemplate extends TemplateManager
         $htmlBody = $settings['header'];
         $htmlBody .= $settings['body'];
 
-        $htmlBody = str_replace('{page_break}', '<page_break />', $htmlBody);
-
         $footer = $settings['footer'];
 
-        $fileName = $feed['name'];
+        $fileName = ShortCodeParser::parse( $feed['name'], $submissionId, $formData);
         $fileName = sanitize_title($fileName, 'pdf-file', 'display');
         $this->pdfBuilder($fileName, $feed, $htmlBody, $footer);
     }
