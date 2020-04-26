@@ -231,6 +231,7 @@ abstract class TemplateManager
         vertical-align: bottom;
         }
         <?php
-        return ob_get_clean();
+        $css = ob_get_clean();
+        return apply_filters('fluentform_pdf_generator_css', $css, $appearance);
     }
 }
