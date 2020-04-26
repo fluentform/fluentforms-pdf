@@ -34,8 +34,6 @@ define('FLUENTFORM_PDF_VERSION', '1.0.0');
 define('FLUENTFORM_PDF_PATH', plugin_dir_path(__FILE__));
 define('FLUENTFORM_PDF_URL', plugin_dir_url(__FILE__));
 
-require_once __DIR__ . '/vendor/autoload.php';
-
 class FluentFormPdf
 {
     public function boot()

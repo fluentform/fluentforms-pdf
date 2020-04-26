@@ -90,6 +90,10 @@ abstract class TemplateManager
 
         $mpdfConfig = apply_filters('fluentform_mpdf_config', $mpdfConfig);
 
+        if(!class_exists('\Mpdf\Mpdf')) {
+            require_once FLUENTFORM_PDF_PATH . 'vendor/autoload.php';
+        }
+
         return new \Mpdf\Mpdf($mpdfConfig);
     }
 
