@@ -110,15 +110,28 @@ abstract class TemplateManager
             'orientation' => Arr::get($appearance, 'orientation'),
         );
 
+        if($fontFamily = ArrayHelper::get($appearance, 'font_family')) {
+            $mpdfConfig['default_font'] = $fontFamily;
+        }
+
+
+
         if (!defined('FLUENTFORMPRO')) {
             $footer .= '<p style="text-align: center;">Powered By <a target="_blank" href="https://wpmanageninja.com/downloads/fluentform-pro-add-on/">Fluent Forms</a></p>';
         }
 
         $pdfGenerator = $this->getGenerator($mpdfConfig);
 
+        if(ArrayHelper::get($appearance, 'security_pass')) {
+            $password = ArrayHelper::get($appearance, 'security_pass');
+            $pdfGenerator->SetProtection(array(), $password, $password);
+        }
+
         if (ArrayHelper::get($appearance, 'language_direction') == 'rtl') {
             $pdfGenerator->SetDirectionality('rtl');
         }
+
+
 
         try {
             // apply CSS styles inline for picky email clients

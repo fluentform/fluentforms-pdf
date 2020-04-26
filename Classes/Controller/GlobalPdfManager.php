@@ -302,6 +302,13 @@ class GlobalPdfManager
             ]
         ];
 
+        $globalFields['security_pass'] = [
+            'key' => 'security_pass',
+            'label' => 'PDF Password',
+            'component' => 'text',
+            'inline_tip' => 'If you want to set password please give on otherwise leave it empty'
+        ];
+
         wp_send_json_success([
             'feed' => $settings,
             'settings_fields' => $instance->getSettingsFields(),
@@ -401,6 +408,13 @@ class GlobalPdfManager
                 'label' => 'Orientation',
                 'component' => 'dropdown',
                 'options' => AvailableOptions::getOrientations()
+            ],
+            [
+                'key' => 'font_family',
+                'label' => 'Font Family',
+                'component' => 'dropdown-group',
+                'placeholder' => 'Select Font',
+                'options' => AvailableOptions::getInstalledFonts()
             ],
             [
                 'key' => 'font_size',
