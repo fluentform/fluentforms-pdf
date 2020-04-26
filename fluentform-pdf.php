@@ -1,12 +1,13 @@
 <?php
 /**
- * Plugin Name: Fluent Forms pdf
+ * Plugin Name: Fluentforms pdf
  * Plugin URI:  https://github.com/hasanuzzamanbe/fluentform-pdf
  * Description: Download entries as pdf with multiple template. 
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com
  * Version: 1.0.0
- * Text Domain: fluentformpdf
+ * Text Domain: fluentform-pdf
+ * Domain Path: /assets/languages
  */
 
 /**
@@ -120,6 +121,11 @@ class FluentFormPdf
 }
 
 add_action('plugins_loaded', function () {
+
+    load_plugin_textdomain(
+        'fluentform-pdf', false, basename(dirname(__FILE__)) . 'assets/languages'
+    );
+
     (new FluentFormPdf())->boot();
 });
 
