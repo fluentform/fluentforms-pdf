@@ -78,7 +78,7 @@ class InvoiceTemplate extends TemplateManager
         );
     }
 
-    public function generatePdf($submissionId, $feed)
+    public function generatePdf($submissionId, $feed, $outPut, $fileName = '')
     {
         $settings = $feed['settings'];
         $submission = wpFluent()->table('fluentform_submissions')
@@ -95,9 +95,12 @@ class InvoiceTemplate extends TemplateManager
 
         $htmlBody = str_replace('{page_break}', '<page_break />', $htmlBody);
 
-        $fileName = ShortCodeParser::parse( $feed['name'], $submissionId, $formData);
-        $fileName = sanitize_title($fileName, 'pdf-file', 'display');
-        $this->pdfBuilder($fileName, $feed, $htmlBody, '');
+        if(!$fileName) {
+            $fileName = ShortCodeParser::parse( $feed['name'], $submissionId, $formData);
+            $fileName = sanitize_title($fileName, 'pdf-file', 'display');
+        }
+
+        return $this->pdfBuilder($fileName, $feed, $htmlBody, '', $outPut);
     }
 
     private function generateInvoiceHTML($submission, $settings, $feed)

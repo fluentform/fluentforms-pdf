@@ -12,9 +12,11 @@ use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
 
 class GeneralTemplate extends TemplateManager
 {
+
     public function __construct(Application $app)
     {
         parent::__construct($app);
+
     }
 
     public function getDefaultSettings($form)
@@ -50,7 +52,7 @@ class GeneralTemplate extends TemplateManager
         );
     }
 
-    public function generatePdf($submissionId, $feed)
+    public function generatePdf($submissionId, $feed, $outPut = 'I', $fileName = '')
     {
         $settings = $feed['settings'];
         $submission = wpFluent()->table('fluentform_submissions')
@@ -65,8 +67,11 @@ class GeneralTemplate extends TemplateManager
 
         $footer = $settings['footer'];
 
-        $fileName = ShortCodeParser::parse( $feed['name'], $submissionId, $formData);
-        $fileName = sanitize_title($fileName, 'pdf-file', 'display');
-        $this->pdfBuilder($fileName, $feed, $htmlBody, $footer);
+        if(!$fileName) {
+            $fileName = ShortCodeParser::parse( $feed['name'], $submissionId, $formData);
+            $fileName = sanitize_title($fileName, 'pdf-file', 'display');
+        }
+
+        return $this->pdfBuilder($fileName, $feed, $htmlBody, $footer, $outPut);
     }
 }

@@ -196,4 +196,18 @@ class AvailableOptions
             'fontSize' => Arr::get($settings, 'font_size', Arr::get($default, 'font_size'))
         ];
     }
+
+    public static function getDirStructure()
+    {
+        $workingPath = wp_upload_dir()['basedir'];
+
+        $workingDir = apply_filters('fluentform_pdf_working_dir', $workingPath . '/FLUENT_PDF_TEMPLATES');
+
+        return [
+            'workingDir' => $workingDir,
+            'tempDir' => apply_filters('fluentform_pdf_temp_dir', $workingDir . '/temp'),
+            'pdfCacheDir' => apply_filters('fluentform_pdf_cache_dir', $workingDir . '/pdfCache'),
+            'fontDir' => apply_filters('fluentform_pdf_font_dir', $workingDir . '/fonts')
+        ];
+    }
 }

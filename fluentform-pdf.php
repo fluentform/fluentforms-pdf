@@ -52,7 +52,13 @@ class FluentFormPdf
 
     protected function includeFiles()
     {
-        require_once FLUENTFORM_PDF_PATH . 'autoload.php';
+        require_once FLUENTFORM_PDF_PATH . 'Classes/Controller/AvailableOptions.php';
+        require_once FLUENTFORM_PDF_PATH . 'Classes/Controller/FontManager.php';
+        require_once FLUENTFORM_PDF_PATH . 'Classes/Controller/GlobalPdfManager.php';
+
+        require_once FLUENTFORM_PDF_PATH . 'Classes/Templates/TemplateManager.php';
+        require_once FLUENTFORM_PDF_PATH . 'Classes/Templates/GeneralTemplate.php';
+        require_once FLUENTFORM_PDF_PATH . 'Classes/Templates/InvoiceTemplate.php';
     }
 
     protected function registerHooks($fluentForm)
@@ -108,13 +114,21 @@ class FluentFormPdf
                 'install-plugin_' . $api->slug
             );
         }
-
         $activation->url = $url;
-
         return $activation;
     }
 }
 
 add_action('plugins_loaded', function () {
     (new FluentFormPdf())->boot();
+});
+
+register_activation_hook(__FILE__, function () {
+    require_once FLUENTFORM_PDF_PATH . '/Classes/Controller/Activator.php';
+    \FluentFormPdf\Classes\Controller\Activator::activate();
+});
+
+register_deactivation_hook( __FILE__, function () {
+    require_once FLUENTFORM_PDF_PATH . '/Classes/Controller/Activator.php';
+    \FluentFormPdf\Classes\Controller\Activator::deactivate();
 });

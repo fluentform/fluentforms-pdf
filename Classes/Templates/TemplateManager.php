@@ -4,28 +4,92 @@ namespace FluentFormPdf\Classes\Templates;
 
 use FluentForm\App\Services\Emogrifier\Emogrifier;
 use FluentForm\Framework\Foundation\Application;
+use FluentForm\Framework\Helpers\ArrayHelper;
 use FluentForm\Framework\Helpers\ArrayHelper as Arr;
+use FluentFormPdf\Classes\Controller\AvailableOptions;
 
 abstract class TemplateManager
 {
     protected $app;
 
+    public $workingDir = '';
+    public $tempDir = '';
+    public $pdfCacheDir = '';
+
+    public $fontDir = '';
+
     public function __construct(Application $app)
     {
         $this->app = $app;
+
+        $dirStructure = AvailableOptions::getDirStructure();
+
+        $this->workingDir = $dirStructure['workingDir'];
+        $this->tempDir = $dirStructure['tempDir'];
+        $this->pdfCacheDir = $dirStructure['pdfCacheDir'];
+        $this->fontDir = $dirStructure['fontDir'];
     }
 
     abstract public function getSettingsFields();
 
-    abstract public function generatePdf($submissionId, $settings);
+    abstract public function generatePdf($submissionId, $settings, $outPut, $fileName = '');
 
     public function viewPDF($submissionId, $settings)
     {
-        $this->generatePdf($submissionId, $settings);
+        $this->generatePdf($submissionId, $settings, 'I');
+    }
+
+    /*
+     * This name should be unique otherwise, it may just return from another file cache
+     */
+    public function outputPDF($submissionId, $settings, $fileName = '', $forceClear = false)
+    {
+        $fileName = $this->pdfCacheDir . '/' . $fileName;
+        if (!$forceClear && file_exists($fileName . '.pdf')) {
+            return $fileName . '.pdf';
+        }
+
+        $this->generatePdf($submissionId, $settings, 'F', $fileName);
+
+        if (file_exists($fileName . '.pdf')) {
+            return $fileName . '.pdf';
+        }
+
+        return false;
+    }
+
+    public function downloadPDF($submissionId, $settings)
+    {
+        return $this->generatePdf($submissionId, $settings, 'D');
     }
 
     public function getGenerator($mpdfConfig)
     {
+        $defaults = [
+            'fontDir' => [
+                $this->fontDir
+            ],
+            'tempDir' => $this->tempDir,
+            'curlCaCertificate' => ABSPATH . WPINC . '/certificates/ca-bundle.crt',
+            'curlFollowLocation' => true,
+            'allow_output_buffering' => true,
+            'autoLangToFont' => true,
+            'useSubstitutions' => true,
+            'ignore_invalid_utf8' => true,
+            'setAutoTopMargin' => 'stretch',
+            'setAutoBottomMargin' => 'stretch',
+            'enableImports' => true,
+            'use_kwt' => true,
+            'keepColumns' => true,
+            'biDirectional' => true,
+            'showWatermarkText' => true,
+            'showWatermarkImage' => true,
+        ];
+
+        $mpdfConfig = wp_parse_args($mpdfConfig, $defaults);
+
+        $mpdfConfig = apply_filters('fluentform_mpdf_config', $mpdfConfig);
+
         return new \Mpdf\Mpdf($mpdfConfig);
     }
 
@@ -46,11 +110,11 @@ abstract class TemplateManager
             $footer .= '<p style="text-align: center;">Powered By <a target="_blank" href="https://wpmanageninja.com/downloads/fluentform-pro-add-on/">Fluent Forms</a></p>';
         }
 
-
-
         $pdfGenerator = $this->getGenerator($mpdfConfig);
-        $fileName = $feed['name'];
-        $fileName = sanitize_title($fileName, 'pdf-file', 'display');
+
+        if (ArrayHelper::get($appearance, 'language_direction') == 'rtl') {
+            $pdfGenerator->SetDirectionality('rtl');
+        }
 
         try {
             // apply CSS styles inline for picky email clients
@@ -61,12 +125,12 @@ abstract class TemplateManager
 
         if (!empty($appearance['watermark_text']) || !empty($appearance['watermark_image'])) {
             $alpha = Arr::get($appearance, 'watermark_opacity');
-            if(!$alpha || $alpha > 100) {
+            if (!$alpha || $alpha > 100) {
                 $alpha = 5;
             }
             $alpha = $alpha / 100;
 
-            if(!empty($appearance['watermark_image'])) {
+            if (!empty($appearance['watermark_image'])) {
                 $pdfGenerator->SetWatermarkImage($appearance['watermark_image'], $alpha);
                 $pdfGenerator->showWatermarkImage = true;
             } else {
@@ -75,10 +139,15 @@ abstract class TemplateManager
             }
         }
 
-
         $pdfGenerator->SetHTMLFooter($footer);
         $pdfGenerator->WriteHTML('<div class="ff_pdf_wrapper">' . $body . '</div>', \Mpdf\HTMLParserMode::HTML_BODY);
+
+        if ($outPut == 'S') {
+            return $pdfGenerator->Output($fileName . '.pdf', $outPut);;
+        }
+
         $pdfGenerator->Output($fileName . '.pdf', $outPut);
+
     }
 
     public function getPdfCss($appearance)
@@ -135,14 +204,14 @@ abstract class TemplateManager
         .aligncenter { display: block; margin-left: auto; margin-right: auto; text-align: center; }
 
         .invoice_title {
-            padding-bottom: 10px;
-            display: block;
+        padding-bottom: 10px;
+        display: block;
         }
         .ffp_table thead th {
-            background-color: #e3e8ee;
-            color: #000;
-            text-align: left;
-            vertical-align: bottom;
+        background-color: #e3e8ee;
+        color: #000;
+        text-align: left;
+        vertical-align: bottom;
         }
         <?php
         return ob_get_clean();

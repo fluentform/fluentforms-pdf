@@ -3,14 +3,8 @@
 namespace FluentFormPdf\Classes\Controller;
 
 use FluentForm\App\Modules\Acl\Acl;
-use FluentForm\App\Services\Emogrifier\Emogrifier;
 use FluentForm\Framework\Helpers\ArrayHelper;
-use Mpdf\Mpdf as Pdf;
-use FluentForm\App\Modules\Entries\Entries;
 use FluentForm\Framework\Foundation\Application;
-use FluentForm\Framework\Helpers\ArrayHelper as Arr;
-use FluentFormPdf\Classes\Controller\AvailableOptions as PdfOptions;
-use FluentForm\App\Services\FormBuilder\ShortCodeParser as ShortCodeParser;
 
 class GlobalPdfManager
 {
@@ -26,10 +20,12 @@ class GlobalPdfManager
 
     protected function registerHooks()
     {
+      //  $this->cleanupTempDir();
+        add_action('fluentform_pdf_cleanup_tmp_dir', array($this, 'cleanupTempDir'));
+
         // Global settings register
         add_filter('fluentform_global_settings_components', [$this, 'globalSettingMenu']);
         add_filter('fluentform_form_settings_menu', [$this, 'formSettingsMenu']);
-        add_action('wp_ajax_fluentform_get_pdf_global_setting_options', [$this, 'getGlobalSettings']);
 
         // single form pdf settings fields ajax
         add_action(
@@ -39,12 +35,16 @@ class GlobalPdfManager
 
         add_action('wp_ajax_fluentform_pdf_admin_ajax_actions', [$this, 'ajaxRoutes']);
 
-        // Frontend render When download button clicked
-        add_action('wp_ajax_fluentform_pdf_download_ajax', [$this, 'pdfDownload']);
-        add_action('wp_ajax_nopriv_fluentform_pdf_download_ajax', [$this, 'pdfDownload']);
-
         add_filter('fluentform_single_entry_widgets', array($this, 'pushPdfButtons'), 10, 2);
 
+        add_filter('fluentform_email_attachments', array($this, 'maybePushToEmail'), 10, 5);
+
+        add_action('fluentform_addons_page_render_fluentform_pdf_settings', array($this, 'renderGlobalPage'));
+
+        add_action('admin_notices', function () {
+            if (!get_option($this->optionKey) && Acl::hasAnyFormPermission())
+                echo '<div class="notice notice-warning"><p>Fluent Forms PDF require to download fonts. Please <a href="' . admin_url('admin.php?page=fluent_form_add_ons&sub_page=fluentform_pdf') . '">click here</a> to download and configure the settings</p></div>';
+        });
     }
 
     public function globalSettingMenu($setting)
@@ -75,11 +75,13 @@ class GlobalPdfManager
             'get_global_settings' => 'getGlobalSettingsAjax',
             'save_global_settings' => 'saveGlobalSettings',
             'get_feeds' => 'getFeedsAjax',
+            'feed_lists' => 'getFeedListAjax',
             'create_feed' => 'createFeedAjax',
             'get_feed' => 'getFeedAjax',
             'save_feed' => 'saveFeedAjax',
             'delete_feed' => 'deleteFeedAjax',
-            'download_pdf' => 'getPdf'
+            'download_pdf' => 'getPdf',
+            'downloadFonts' => 'downloadFonts'
         ];
 
         $route = sanitize_text_field($_REQUEST['route']);
@@ -147,6 +149,26 @@ class GlobalPdfManager
 
     }
 
+    public function getFeedListAjax()
+    {
+        $formId = intval($_REQUEST['form_id']);
+
+        $feeds = $this->getFeeds($formId);
+
+        $formattedFeeds = [];
+        foreach ($feeds as $feed) {
+            $formattedFeeds[] = [
+                'label' => $feed['name'],
+                'id' => $feed['id']
+            ];
+        }
+
+        wp_send_json_success([
+            'pdf_feeds' => $formattedFeeds
+        ], 200);
+
+    }
+
     public function createFeedAjax()
     {
         $templateName = sanitize_text_field($_REQUEST['template']);
@@ -158,7 +180,7 @@ class GlobalPdfManager
 
         $templates = $this->getAvailableTemplates($form);
 
-        if(!isset($templates[$templateName]) || !$formId) {
+        if (!isset($templates[$templateName]) || !$formId) {
             wp_send_json_error([
                 'message' => __('Sorry! No template found!', 'fluentform-pdf')
             ], 423);
@@ -167,7 +189,7 @@ class GlobalPdfManager
         $template = $templates[$templateName];
 
         $class = $template['class'];
-        if(!class_exists($class)) {
+        if (!class_exists($class)) {
             wp_send_json_error([
                 'message' => __('Sorry! No template Class found!', 'fluentform-pdf')
             ], 423);
@@ -232,7 +254,7 @@ class GlobalPdfManager
 
         $templates = $this->getAvailableTemplates($form);
 
-        if(!isset($templates[$templateName]) || !$formId) {
+        if (!isset($templates[$templateName]) || !$formId) {
             wp_send_json_error([
                 'message' => __('Sorry! No template found!', 'fluentform-pdf')
             ], 423);
@@ -241,7 +263,7 @@ class GlobalPdfManager
         $template = $templates[$templateName];
 
         $class = $template['class'];
-        if(!class_exists($class)) {
+        if (!class_exists($class)) {
             wp_send_json_error([
                 'message' => __('Sorry! No template Class found!', 'fluentform-pdf')
             ], 423);
@@ -270,6 +292,16 @@ class GlobalPdfManager
             'inline_tip' => 'Value should be between 1 to 100'
         ];
 
+        $globalFields['language_direction'] = [
+            'key' => 'language_direction',
+            'label' => 'Language Direction',
+            'component' => 'radio_choice',
+            'options' => [
+                'ltr' => 'LTR',
+                'rtl' => 'RTL'
+            ]
+        ];
+
         wp_send_json_success([
             'feed' => $settings,
             'settings_fields' => $instance->getSettingsFields(),
@@ -290,7 +322,7 @@ class GlobalPdfManager
         $feedId = intval($_REQUEST['feed_id']);
         $feed = wp_unslash($_REQUEST['feed']);
 
-        if(empty($feed['name'])) {
+        if (empty($feed['name'])) {
             wp_send_json_error([
                 'message' => __('Feed name is required', 'fluentform-pdf')
             ], 423);
@@ -321,6 +353,7 @@ class GlobalPdfManager
         ], 200);
 
     }
+
     /*
     * @return key => [ path, name]
     * To register a new template this filter must hook for path mapping
@@ -328,7 +361,7 @@ class GlobalPdfManager
     */
     public function getAvailableTemplates($form)
     {
-        $templates =  [
+        $templates = [
             "general" => [
                 'name' => 'General',
                 'class' => '\FluentFormPdf\Classes\Templates\GeneralTemplate',
@@ -337,7 +370,7 @@ class GlobalPdfManager
             ]
         ];
 
-        if($form->has_payment) {
+        if ($form->has_payment) {
             $templates['invoice'] = [
                 'name' => 'Invoice',
                 'class' => '\FluentFormPdf\Classes\Templates\InvoiceTemplate',
@@ -345,7 +378,7 @@ class GlobalPdfManager
                 'preview' => FLUENTFORM_PDF_URL . 'assets/images/tabular.png'
             ];
         }
-        return  apply_filters( 'fluentform_pdf_templates',$templates, $form);
+        return apply_filters('fluentform_pdf_templates', $templates, $form);
     }
 
 
@@ -361,13 +394,13 @@ class GlobalPdfManager
                 'label' => 'Paper size',
                 'component' => 'dropdown',
                 'tips' => 'All available templates are shown here, select a default template',
-                'options' => PdfOptions::getPaperSizes()
+                'options' => AvailableOptions::getPaperSizes()
             ],
             [
                 'key' => 'orientation',
                 'label' => 'Orientation',
                 'component' => 'dropdown',
-                'options' => PdfOptions::getOrientations()
+                'options' => AvailableOptions::getOrientations()
             ],
             [
                 'key' => 'font_size',
@@ -404,12 +437,11 @@ class GlobalPdfManager
         ];
     }
 
-
     public function pushPdfButtons($widgets, $data)
     {
         $formId = $data['submission']->form_id;
         $feeds = $this->getFeeds($formId);
-        if(!$feeds) {
+        if (!$feeds) {
             return $widgets;
         }
         $widgetData = [
@@ -419,7 +451,7 @@ class GlobalPdfManager
 
         $contents = '<ul class="ff_list_items">';
         foreach ($feeds as $feed) {
-            $contents .= '<li><a href="'.admin_url('admin-ajax.php?action=fluentform_pdf_admin_ajax_actions&route=download_pdf&submission_id='.$data['submission']->id.'&id='.$feed['id']).'" target="_blank"><span style="font-size: 12px;" class="dashicons dashicons-arrow-down-alt"></span>'.$feed['name'].'</a></li>';
+            $contents .= '<li><a href="' . admin_url('admin-ajax.php?action=fluentform_pdf_admin_ajax_actions&route=download_pdf&submission_id=' . $data['submission']->id . '&id=' . $feed['id']) . '" target="_blank"><span style="font-size: 12px;" class="dashicons dashicons-arrow-down-alt"></span>' . $feed['name'] . '</a></li>';
         }
         $contents .= '</ul>';
         $widgetData['content'] = $contents;
@@ -430,14 +462,12 @@ class GlobalPdfManager
 
     }
 
-
-
     public function getPdfConfig($settings, $default)
     {
         return [
             'mode' => 'utf-8',
-            'format' => Arr::get($settings, 'paper_size', Arr::get($default, 'paper_size')),
-            'orientation' => Arr::get($settings, 'orientation', Arr::get($default, 'orientation')),
+            'format' => ArrayHelper::get($settings, 'paper_size', ArrayHelper::get($default, 'paper_size')),
+            'orientation' => ArrayHelper::get($settings, 'orientation', ArrayHelper::get($default, 'orientation')),
             // 'debug' => true //uncomment this debug on development
         ];
     }
@@ -460,21 +490,21 @@ class GlobalPdfManager
         $settings['id'] = $feed->id;
 
         $form = wpFluent()->table('fluentform_forms')
-                    ->where('id', $feed->form_id)
-                    ->first();
+            ->where('id', $feed->form_id)
+            ->first();
 
         $templateName = ArrayHelper::get($settings, 'template_key');
 
         $templates = $this->getAvailableTemplates($form);
 
-        if(!isset($templates[$templateName])) {
+        if (!isset($templates[$templateName])) {
             die('Sorry! No template found');
         }
 
         $template = $templates[$templateName];
 
         $class = $template['class'];
-        if(!class_exists($class)) {
+        if (!class_exists($class)) {
             die('Sorry! No template class found');
         }
 
@@ -482,5 +512,174 @@ class GlobalPdfManager
 
         $instance->viewPDF($submissionId, $settings);
 
+    }
+
+    public function maybePushToEmail($emailAttachments, $emailData, $formData, $entry, $form)
+    {
+        if (!ArrayHelper::get($emailData, 'pdf_attachments')) {
+            return $emailAttachments;
+        }
+
+        $pdfFeedIds = ArrayHelper::get($emailData, 'pdf_attachments');
+
+        $feeds = wpFluent()->table('fluentform_form_meta')
+            ->whereIn('id', $pdfFeedIds)
+            ->where('meta_key', '_pdf_feeds')
+            ->where('form_id', $form->id)
+            ->get();
+
+        $templates = $this->getAvailableTemplates($form);
+
+        foreach ($feeds as $feed) {
+            $settings = json_decode($feed->value, true);
+            $settings['id'] = $feed->id;
+            $templateName = ArrayHelper::get($settings, 'template_key');
+
+            if (!isset($templates[$templateName])) {
+                continue;
+            }
+            $template = $templates[$templateName];
+            $class = $template['class'];
+            if (!class_exists($class)) {
+                continue;
+            }
+            $instance = new $class($this->app);
+
+            // we have to compute the file name to make it unique
+            $fileName = $settings['name'] . '_' . $entry->id . '_' . $feed->id;
+
+            if(is_multisite()) {
+                $fileName .= '_'.get_current_blog_id();
+            }
+
+            $file = $instance->outputPDF($entry->id, $settings, $fileName, false);
+            if ($file) {
+                $emailAttachments[] = $file;
+            }
+        }
+
+
+        return $emailAttachments;
+    }
+
+
+    public function renderGlobalPage()
+    {
+        wp_enqueue_script('fluentform_pdf_admin', FLUENTFORM_PDF_URL . 'assets/js/admin.js', ['jquery'], FLUENTFORM_PDF_VERSION, true);
+        $fontManager = new FontManager();
+        $downloadableFiles = $fontManager->getDownloadableFonts();
+
+        wp_localize_script('fluentform_pdf_admin', 'fluentform_pdf_admin', [
+            'ajaxUrl' => admin_url('admin-ajax.php')
+        ]);
+
+        $statuses = [];
+        $globalSettingsUrl = '#';
+        if (!$downloadableFiles) {
+            $statuses = $this->getSystemStatuses();
+            $globalSettingsUrl = admin_url('admin.php?page=fluent_forms_settings#pdf_settings');
+
+            if (!get_option($this->optionKey)) {
+                update_option($this->optionKey, $this->globalSettings(), 'no');
+            }
+        }
+
+        include FLUENTFORM_PDF_PATH . '/assets/views/admin_screen.php';
+    }
+
+    public function downloadFonts()
+    {
+        $fontManager = new FontManager();
+        $downloadableFiles = $fontManager->getDownloadableFonts(3);
+
+        $downloadedFiles = [];
+        foreach ($downloadableFiles as $downloadableFile) {
+            $fontName = $downloadableFile['name'];
+            $res = $fontManager->download($fontName);
+            $downloadedFiles[] = $fontName;
+            if (is_wp_error($res)) {
+                wp_send_json_error([
+                    'message' => 'Font Download failed. Please reload and try again'
+                ], 423);
+            }
+        }
+
+        wp_send_json_success([
+            'downloaded_files' => $downloadedFiles
+        ], 200);
+    }
+
+    private function getSystemStatuses()
+    {
+        $mbString = extension_loaded('mbstring');
+        $mbRegex = extension_loaded('mbstring') && function_exists('mb_regex_encoding');
+        $gd = extension_loaded('gd');
+        $dom = extension_loaded('dom') || class_exists('DOMDocument');
+        $libXml = extension_loaded('libxml');
+        $extensions = [
+            'mbstring' => [
+                'status' => $mbString,
+                'label' => ($mbString) ? 'MBString is enabled' : 'The PHP Extension MB String could not be detected. Contact your web hosting provider to fix.'
+            ],
+            'mb_regex_encoding' => [
+                'status' => $mbRegex,
+                'label' => ($mbRegex) ? 'MBString Regex is enabled' : 'The PHP Extension MB String does not have MB Regex enabled. Contact your web hosting provider to fix.'
+            ],
+            'gd' => [
+                'status' => $gd,
+                'label' => ($gd) ? 'GD Library is enabled' : 'The PHP Extension GD Image Library could not be detected. Contact your web hosting provider to fix.'
+            ],
+            'dom' => [
+                'status' => $dom,
+                'label' => ($dom) ? 'PHP Dom is enabled' : 'The PHP DOM Extension was not found. Contact your web hosting provider to fix.'
+            ],
+            'libXml' => [
+                'status' => $libXml,
+                'label' => ($libXml) ? 'LibXml is OK' : 'The PHP Extension libxml could not be detected. Contact your web hosting provider to fix'
+            ]
+        ];
+
+        $overAllStatus = $mbString && $mbRegex && $gd && $dom && $libXml;
+
+        return [
+            'status' => $overAllStatus,
+            'extensions' => $extensions
+        ];
+    }
+
+    public function cleanupTempDir()
+    {
+        $max_file_age = time() - 6 * 3600; /* Max age is 6 hours old */
+        $dirs = AvailableOptions::getDirStructure();
+        $cleanUpDirs = [
+            $dirs['tempDir'].'/ttfontdata/',
+            $dirs['pdfCacheDir'].'/'
+        ];
+
+        foreach ($cleanUpDirs as $tmp_directory) {
+            if (is_dir($tmp_directory)) {
+
+                try {
+                    $directory_list = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($tmp_directory, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::CHILD_FIRST
+                    );
+
+                    foreach ($directory_list as $file) {
+                        if (in_array($file->getFilename(), ['.htaccess', 'index.html'], true)) {
+                            continue;
+                        }
+
+                        if ($file->isReadable() && $file->getMTime() < $max_file_age) {
+                            if (!$file->isDir()) {
+                                unlink($file);
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                   //
+                }
+            }
+        }
     }
 }
