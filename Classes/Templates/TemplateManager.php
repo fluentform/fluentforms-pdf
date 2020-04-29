@@ -90,7 +90,7 @@ abstract class TemplateManager
 
         $mpdfConfig = apply_filters('fluentform_mpdf_config', $mpdfConfig);
 
-        if(!class_exists('\Mpdf\Mpdf')) {
+        if (!class_exists('\Mpdf\Mpdf')) {
             require_once FLUENTFORM_PDF_PATH . 'vendor/autoload.php';
         }
 
@@ -110,11 +110,9 @@ abstract class TemplateManager
             'orientation' => Arr::get($appearance, 'orientation'),
         );
 
-        if($fontFamily = ArrayHelper::get($appearance, 'font_family')) {
+        if ($fontFamily = ArrayHelper::get($appearance, 'font_family')) {
             $mpdfConfig['default_font'] = $fontFamily;
         }
-
-
 
         if (!defined('FLUENTFORMPRO')) {
             $footer .= '<p style="text-align: center;">Powered By <a target="_blank" href="https://wpmanageninja.com/downloads/fluentform-pro-add-on/">Fluent Forms</a></p>';
@@ -122,15 +120,15 @@ abstract class TemplateManager
 
         $pdfGenerator = $this->getGenerator($mpdfConfig);
 
-        if(ArrayHelper::get($appearance, 'security_pass')) {
+        if (ArrayHelper::get($appearance, 'security_pass')) {
             $password = ArrayHelper::get($appearance, 'security_pass');
             $pdfGenerator->SetProtection(array(), $password, $password);
         }
 
         if (ArrayHelper::get($appearance, 'language_direction') == 'rtl') {
             $pdfGenerator->SetDirectionality('rtl');
+            $body = '<div class="ff_rtl">' . $body . '</div>';
         }
-
 
 
         try {
@@ -188,7 +186,7 @@ abstract class TemplateManager
         font-size: <?php echo $fontSize; ?>px;
         }
 
-        .ff_all_data {
+        .ff_all_data, table {
         empty-cells: show;
         border-collapse: collapse;
         border: 1px solid <?php echo $secondaryColor; ?>;
@@ -213,6 +211,11 @@ abstract class TemplateManager
         padding-bottom: 15px !important;
         }
 
+        .ff_all_data tr td, .ff_all_data tr th {
+        border: 1px solid <?php echo $secondaryColor; ?>;
+        text-align: left;
+        }
+
         table, .ff_all_data { width: 100%; } img.alignright { float: right; margin: 0 0 1em 1em; }
         img.alignleft { float: left; margin: 0 10px 10px 0; }
         img.aligncenter { display: block; margin-left: auto; margin-right: auto; text-align: center; }
@@ -229,6 +232,12 @@ abstract class TemplateManager
         color: #000;
         text-align: left;
         vertical-align: bottom;
+        }
+        table th {
+        padding: 5px 10px;
+        }
+        .ff_rtl table th, .ff_rtl table td {
+            text-align: right !important;
         }
         <?php
         $css = ob_get_clean();

@@ -116,7 +116,7 @@ class InvoiceTemplate extends TemplateManager
 
         ob_start();
         ?>
-        <table style="width: 100%;">
+        <table style="width: 100%; border: 0px solid transparent;">
             <tr>
                 <td style="width: 40%" class="business_details">
                     <?php if($logo): ?>

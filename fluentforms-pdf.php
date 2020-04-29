@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: Fluentforms pdf
- * Plugin URI:  https://github.com/hasanuzzamanbe/fluentform-pdf
+ * Plugin Name: Fluent Forms PDF Generator
+ * Plugin URI:  https://wpmanageninja.com/downloads/fluentform-pro-add-on/
  * Description: Download entries as pdf with multiple template. 
  * Author: WPManageNinja LLC
  * Author URI:  https://wpmanageninja.com
@@ -27,7 +27,6 @@
  *
  * Copyright 2019 WPManageNinja LLC. All rights reserved.
  */
-
 
 defined('ABSPATH') or die;
 define('FLUENTFORM_PDF_VERSION', '1.0.0');

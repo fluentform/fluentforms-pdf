@@ -111,7 +111,7 @@ class GlobalPdfManager
             'font_color' => '#323232',
             'accent_color' => '#989797',
             'heading_color' => '#000000',
-            'reverse_text' => 'no'
+            'language_direction' => 'ltr'
         ];
 
         $option = get_option($this->optionKey);
@@ -292,16 +292,6 @@ class GlobalPdfManager
             'inline_tip' => 'Value should be between 1 to 100'
         ];
 
-        $globalFields['language_direction'] = [
-            'key' => 'language_direction',
-            'label' => 'Language Direction',
-            'component' => 'radio_choice',
-            'options' => [
-                'ltr' => 'LTR',
-                'rtl' => 'RTL'
-            ]
-        ];
-
         $globalFields['security_pass'] = [
             'key' => 'security_pass',
             'label' => 'PDF Password',
@@ -439,13 +429,13 @@ class GlobalPdfManager
                 'component' => 'color_picker'
             ],
             [
-                'key' => 'reverse_text',
-                'label' => 'Reverse text',
-                'tips' => 'Script like Arabic and Hebrew are written right to left.',
+                'key' => 'language_direction',
+                'label' => 'Language Direction',
+                'tips' => 'Script like Arabic and Hebrew are written right to left. For Arabic/Hebrew please select RTL',
                 'component' => 'radio_choice',
                 'options' => [
-                    'yes' => 'Yes',
-                    'no' => 'No'
+                    'ltr' => 'LTR',
+                    'rtl' => 'RTL'
                 ]
             ]
         ];

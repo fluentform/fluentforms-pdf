@@ -1,19 +1,43 @@
 === Fluent Forms PDF ===
-Contributors: techjewel,,wpmanageninja,hasanuzzamanshamim
-Tags: Integration, PDF
+Contributors: techjewel,adreastrian,heera,wpmanageninja,hasanuzzamanshamim
+Tags: PDF, Form To PDF, attachment, fluent forms
 Requires at least: 5.0
-Tested up to: 5.3.2
+Tested up to: 5.4.0
 Requires PHP: 5.6
 Stable tag: trunk
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Pdf For Fluent Forms Plugin
+Generate PDF from Your Form Submissions and Download/Email Them
 
 == Description ==
-Pdf Integration For Fluent Forms Plugin
+**PDF Addon for Fluent Forms is the supplement you will need to automatically generate PDF files based on what users submit on the forms you created with WP Fluent Forms.**
+
+If you are looking forward to generate PDF files based on user submitted entries on your Fluent Forms plugin, this add-on is the perfect solution for you. With this add-on, you will be able to hand out to your users custom PDF files with your company logo engraved as a watermark, custom cover letter, dynamic personalised form entry summary or even payment invoices.
+
+The plugin comes with a customisable PDF template. Within a minute, you will be able to set up personalised PDF template with your company name, logo, entry date, dynamic personalisation, body text font family, size, color, PDF page orientation and the paper size. To automatically personalise the PDF files for every form entry, you can use shortcodes that will fetch the form input by themselves so that you don't have to sweat over it.
+
+You can also send these PDF files via emails to your users and make them password-protected with just a few clicks.
+
+= Feature =
+
+* Automated PDF generation based of form entries
+* Supports all languages including Right-to-left (RTL) languages such as Arabic and Hebrew
+* Customisable PDF template
+* Customisable font family, color, page orientation and dimensions, watermark texts and logos, page footer and more
+* Password-protected PDF files
+* Deliver the PDF files via automated email notifications
+* Conditional PDF generation that will be triggered when certain conditions are fulfilled
+* Automatically generate invoices in PDF format after a payment is successful
+* Upload and use any font you want in your PDF documents
 
 == Screenshots ==
+1. Generated PDF Preview
+2. PDF Feed Settings
+3. PDF Content Settings
+4. PDF Templates
+5. Global PDF Settings
+6. Global PDF system status
 
 
 == Changelog ==
