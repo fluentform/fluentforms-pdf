@@ -2,9 +2,9 @@
 Contributors: techjewel,adreastrian,heera,wpmanageninja,hasanuzzamanshamim
 Tags: PDF, Form To PDF, attachment, fluent forms
 Requires at least: 5.0
-Tested up to: 5.4.0
+Tested up to: 5.4.2
 Requires PHP: 5.6
-Stable tag: trunk
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ You can also send these PDF files via emails to your users and make them passwor
 
 
 == Changelog ==
+
+= 1.0.1 - July 08, 2020 =
+- Enable Multi-site compatability
 
 = 1.0.0 =
 * Init Release
