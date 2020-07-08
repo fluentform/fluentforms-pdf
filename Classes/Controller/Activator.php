@@ -46,7 +46,6 @@ class Activator
 
     public static function deactivate()
     {
-
         if(is_multisite()) {
             return;
         }
@@ -65,7 +64,7 @@ class Activator
         ];
 
         if(!class_exists('\WP_Filesystem_Direct')) {
-            $admin_path = str_replace( get_bloginfo( 'url' ) . '/', ABSPATH, get_admin_url() );
+            $admin_path = ABSPATH .'/wp-admin/';
             if(!class_exists('\WP_Filesystem_Base')) {
                 include_once $admin_path.'includes/class-wp-filesystem-base.php';
             }

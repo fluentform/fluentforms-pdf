@@ -17,7 +17,7 @@ class FontManager
     {
         $fontDir = $this->getFontDir();
         if(!function_exists('\list_files')) {
-            $admin_path = str_replace( get_bloginfo( 'url' ) . '/', ABSPATH, get_admin_url() );
+            $admin_path = ABSPATH .'/wp-admin/';
             include_once $admin_path.'includes/file.php';
         }
         $downloadedFiles = \list_files($fontDir, 1);
